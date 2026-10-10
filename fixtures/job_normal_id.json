@@ -1,0 +1,111 @@
+{
+  "doc_id": "cd21b03a-8401-43d5-bf16-c5909f52c7f1",
+  "sha256": "65d524266d2fbc75d13fe83874c0aa37c36ba68f26026b710346cdcb24538e7f",
+  "pages": 1,
+  "lines": [
+    {
+      "text": "GOVERNMENT IDENTIFICATION CARD",
+      "page": 0,
+      "bbox": {
+        "x0": 79.36045197558802,
+        "y0": 69.0559439000642,
+        "x1": 645.0581524760763,
+        "y1": 104.0209788650992
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "applicant_name:",
+      "page": 0,
+      "bbox": {
+        "x0": 95.52778618676595,
+        "y0": 161.94528542697407,
+        "x1": 307.3791903768294,
+        "y1": 199.84333241401407
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Rohan Verma",
+      "page": 0,
+      "bbox": {
+        "x0": 344.166666395115,
+        "y0": 156.9767439995574,
+        "x1": 536.666666395115,
+        "y1": 197.6744186508035
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "id_number:",
+      "page": 0,
+      "bbox": {
+        "x0": 95.1311508953161,
+        "y0": 204.4113148220701,
+        "x1": 240.7178341686315,
+        "y1": 242.49302080910684
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "236123456782",
+      "page": 0,
+      "bbox": {
+        "x0": 378.03346197685664,
+        "y0": 201.8448351008334,
+        "x1": 551.8677477129406,
+        "y1": 233.1568239313998
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "document_date:",
+      "page": 0,
+      "bbox": {
+        "x0": 97.5475441210708,
+        "y0": 250.03459830385776,
+        "x1": 299.3640590899428,
+        "y1": 283.59272023182604
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "2023-01-15",
+      "page": 0,
+      "bbox": {
+        "x0": 378.36638434510604,
+        "y0": 247.43053283953242,
+        "x1": 510.8778017340221,
+        "y1": 278.99223095282053
+      },
+      "conf": 1.0
+    }
+  ],
+  "tables": [],
+  "text_by_page": {
+    "0": "GOVERNMENT IDENTIFICATION CARD\napplicant_name:\nRohan Verma\nid_number:\n236123456782\ndocument_date:\n2023-01-15"
+  },
+  "reader_name": "combined",
+  "meta": {
+    "reader": "combined",
+    "page_dimensions": [
+      {
+        "page": 0,
+        "width": 1400,
+        "height": 1000
+      }
+    ],
+    "line_engines": [
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr"
+    ],
+    "tables": [],
+    "total_lines": 7,
+    "total_tables": 0
+  }
+}

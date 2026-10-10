@@ -1,0 +1,135 @@
+{
+  "doc_id": "2c0ba9ef-fd5b-43c9-9034-769dd618cf09",
+  "sha256": "c8a9c510b416f0b5ab18514c752a50091cdd4f6300e5d02eb87b1a1f549ac29b",
+  "pages": 1,
+  "lines": [
+    {
+      "text": "RÉSUMÉ – Rohan Verma",
+      "page": 0,
+      "bbox": {
+        "x0": 166.66666666666666,
+        "y0": 140.94443851047092,
+        "x1": 758.4665934244791,
+        "y1": 209.79444715711804
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Applicant Name:",
+      "page": 0,
+      "bbox": {
+        "x0": 194.44444444444443,
+        "y0": 297.6666768391927,
+        "x1": 457.44442409939234,
+        "y1": 343.5666614108615
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Rohan Verma",
+      "page": 0,
+      "bbox": {
+        "x0": 666.6666666666666,
+        "y0": 297.49999576144745,
+        "x1": 872.2999572753906,
+        "y1": 343.29999287923175
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Phone:",
+      "page": 0,
+      "bbox": {
+        "x0": 194.44444444444443,
+        "y0": 375.44445461697046,
+        "x1": 307.4111090766059,
+        "y1": 421.3444603814019
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "+91 98765 43210",
+      "page": 0,
+      "bbox": {
+        "x0": 666.6666666666666,
+        "y0": 375.27779473198785,
+        "x1": 927.0665486653645,
+        "y1": 421.0777706570095
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Highest Qualification:",
+      "page": 0,
+      "bbox": {
+        "x0": 194.44444444444443,
+        "y0": 453.22223239474823,
+        "x1": 538.9444139268663,
+        "y1": 499.1222381591797
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "B.Tech Computer Science",
+      "page": 0,
+      "bbox": {
+        "x0": 666.6666666666666,
+        "y0": 453.0555725097656,
+        "x1": 1055.6999206542969,
+        "y1": 498.8555484347873
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Institution:",
+      "page": 0,
+      "bbox": {
+        "x0": 194.44444444444443,
+        "y0": 531.000010172526,
+        "x1": 366.6444566514757,
+        "y1": 576.9000159369574
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Indian Institute of Technology",
+      "page": 0,
+      "bbox": {
+        "x0": 666.6666666666666,
+        "y0": 530.8333502875433,
+        "x1": 1102.099863688151,
+        "y1": 576.6333262125651
+      },
+      "conf": 1.0
+    }
+  ],
+  "tables": [],
+  "text_by_page": {
+    "0": "RÉSUMÉ – Rohan Verma\nApplicant Name:\nRohan Verma\nPhone:\n+91 98765 43210\nHighest Qualification:\nB.Tech Computer Science\nInstitution:\nIndian Institute of Technology"
+  },
+  "reader_name": "combined",
+  "meta": {
+    "reader": "combined",
+    "page_dimensions": [
+      {
+        "page": 0,
+        "width": 1700,
+        "height": 2200
+      }
+    ],
+    "line_engines": [
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text"
+    ],
+    "tables": [],
+    "total_lines": 9,
+    "total_tables": 0
+  }
+}

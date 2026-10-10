@@ -1,0 +1,123 @@
+{
+  "doc_id": "70bb0c78-bd41-4670-911a-035c2615bb1e",
+  "sha256": "a0785cd148d9d1e80fe6339a8acee49ff3671428e15ff8855918dc4f4ab5b768",
+  "pages": 1,
+  "lines": [
+    {
+      "text": "Certificate of Completion",
+      "page": 0,
+      "bbox": {
+        "x0": 443.80556742350257,
+        "y0": 257.7333238389757,
+        "x1": 1256.1944749620225,
+        "y1": 358.53335062662757
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "This is formally presented to",
+      "page": 0,
+      "bbox": {
+        "x0": 627.4583180745442,
+        "y0": 407.46112399631073,
+        "x1": 1072.5418090820312,
+        "y1": 454.9444410536024
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Vikramaditya Rao",
+      "page": 0,
+      "bbox": {
+        "x0": 606.4111073811848,
+        "y0": 491.7555491129557,
+        "x1": 1093.5887654622395,
+        "y1": 576.3944413926866
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "for demonstrating exemplary technical proficiency in Enterprise Architecture",
+      "page": 0,
+      "bbox": {
+        "x0": 334.84999338785804,
+        "y0": 631.566662258572,
+        "x1": 1365.1501125759548,
+        "y1": 676.0333167182074
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Roll / Reg Number: 20210089",
+      "page": 0,
+      "bbox": {
+        "x0": 222.22222222222223,
+        "y0": 1723.655531141493,
+        "x1": 607.5277540418837,
+        "y1": 1765.9749348958333
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Issue Date: 2023-05-18",
+      "page": 0,
+      "bbox": {
+        "x0": 1033.3333333333333,
+        "y0": 1723.655531141493,
+        "x1": 1328.652615017361,
+        "y1": 1765.9749348958333
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "National ID: 236123456783",
+      "page": 0,
+      "bbox": {
+        "x0": 222.22222222222223,
+        "y0": 1779.2110866970486,
+        "x1": 577.0027584499783,
+        "y1": 1821.530490451389
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Grade: Distinction",
+      "page": 0,
+      "bbox": {
+        "x0": 1033.3333333333333,
+        "y0": 1779.2110866970486,
+        "x1": 1276.9222683376736,
+        "y1": 1821.530490451389
+      },
+      "conf": 1.0
+    }
+  ],
+  "tables": [],
+  "text_by_page": {
+    "0": "Certificate of Completion\nThis is formally presented to\nVikramaditya Rao\nfor demonstrating exemplary technical proficiency in Enterprise Architecture\nRoll / Reg Number: 20210089\nIssue Date: 2023-05-18\nNational ID: 236123456783\nGrade: Distinction"
+  },
+  "reader_name": "combined",
+  "meta": {
+    "reader": "combined",
+    "page_dimensions": [
+      {
+        "page": 0,
+        "width": 1700,
+        "height": 2200
+      }
+    ],
+    "line_engines": [
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text"
+    ],
+    "tables": [],
+    "total_lines": 8,
+    "total_tables": 0
+  }
+}

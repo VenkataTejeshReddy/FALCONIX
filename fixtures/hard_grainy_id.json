@@ -1,0 +1,159 @@
+{
+  "doc_id": "3d1fc2e0-0143-40b9-99e2-58e7e8525916",
+  "sha256": "3a23918abe25a76dbaa1bbd25862d7d99d69a85097ec4125e1b311e08cc7a52c",
+  "pages": 1,
+  "lines": [
+    {
+      "text": "OFFICIAL RECORD",
+      "page": 0,
+      "bbox": {
+        "x0": 79.36046563553212,
+        "y0": 83.04195826900762,
+        "x1": 335.7558132307469,
+        "y1": 107.72357726627469
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Applicant Name:",
+      "page": 0,
+      "bbox": {
+        "x0": 97.39926997273257,
+        "y0": 170.7966947067253,
+        "x1": 268.8589486226349,
+        "y1": 195.7559688119841
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Vikramaditya Rao",
+      "page": 0,
+      "bbox": {
+        "x0": 447.6744178667857,
+        "y0": 172.7642274509551,
+        "x1": 628.7790702715707,
+        "y1": 195.12195138062037
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Identification Number:",
+      "page": 0,
+      "bbox": {
+        "x0": 97.50485750134386,
+        "y0": 221.75188705165206,
+        "x1": 327.7830519288342,
+        "y1": 243.996355487193
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "236123456783",
+      "page": 0,
+      "bbox": {
+        "x0": 449.7093040854902,
+        "y0": 223.57723614664005,
+        "x1": 606.3953468711347,
+        "y1": 241.86991830083537
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Date of Issue:",
+      "page": 0,
+      "bbox": {
+        "x0": 99.41452648204223,
+        "y0": 273.01373087956716,
+        "x1": 236.3613991932239,
+        "y1": 294.8465454629787
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "2023-04-15",
+      "page": 0,
+      "bbox": {
+        "x0": 447.67441741797865,
+        "y0": 272.35772324732363,
+        "x1": 567.7325591263527,
+        "y1": 292.68292712288536
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Course / Position:",
+      "page": 0,
+      "bbox": {
+        "x0": 99.49791401811895,
+        "y0": 321.35003061359737,
+        "x1": 274.9676978010779,
+        "y1": 343.73346290186726
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Senior Technical Specialist",
+      "page": 0,
+      "bbox": {
+        "x0": 449.50585121104643,
+        "y0": 320.6957259030396,
+        "x1": 720.5281557459585,
+        "y1": 346.37318012453835
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Issuing Authority:",
+      "page": 0,
+      "bbox": {
+        "x0": 97.36328279780358,
+        "y0": 370.10961594829485,
+        "x1": 279.0804325323007,
+        "y1": 397.6562985061545
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Central Verification Bureau",
+      "page": 0,
+      "bbox": {
+        "x0": 449.70930552788786,
+        "y0": 371.9512191842994,
+        "x1": 722.3837173015695,
+        "y1": 392.4825175816037
+      },
+      "conf": 1.0
+    }
+  ],
+  "tables": [],
+  "text_by_page": {
+    "0": "OFFICIAL RECORD\nApplicant Name:\nVikramaditya Rao\nIdentification Number:\n236123456783\nDate of Issue:\n2023-04-15\nCourse / Position:\nSenior Technical Specialist\nIssuing Authority:\nCentral Verification Bureau"
+  },
+  "reader_name": "combined",
+  "meta": {
+    "reader": "combined",
+    "page_dimensions": [
+      {
+        "page": 0,
+        "width": 1400,
+        "height": 1000
+      }
+    ],
+    "line_engines": [
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr"
+    ],
+    "tables": [],
+    "total_lines": 11,
+    "total_tables": 0
+  }
+}

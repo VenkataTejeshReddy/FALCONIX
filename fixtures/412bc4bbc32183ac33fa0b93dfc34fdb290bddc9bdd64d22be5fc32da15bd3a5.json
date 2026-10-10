@@ -1,0 +1,135 @@
+{
+  "doc_id": "03692605-f30c-4e49-858a-e23e6321ec55",
+  "sha256": "412bc4bbc32183ac33fa0b93dfc34fdb290bddc9bdd64d22be5fc32da15bd3a5",
+  "pages": 1,
+  "lines": [
+    {
+      "text": "EMPLOYMENT OFFER LETTER",
+      "page": 0,
+      "bbox": {
+        "x0": 166.66666666666666,
+        "y0": 140.94443851047092,
+        "x1": 911.1666361490885,
+        "y1": 209.79444715711804
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Candidate Name:",
+      "page": 0,
+      "bbox": {
+        "x0": 194.44444444444443,
+        "y0": 297.6666768391927,
+        "x1": 466.7110866970486,
+        "y1": 343.5666614108615
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Ananya Iyer",
+      "page": 0,
+      "bbox": {
+        "x0": 666.6666666666666,
+        "y0": 297.49999576144745,
+        "x1": 844.5332845052083,
+        "y1": 343.29999287923175
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Designation:",
+      "page": 0,
+      "bbox": {
+        "x0": 194.44444444444443,
+        "y0": 375.44445461697046,
+        "x1": 396.31110297309027,
+        "y1": 421.3444603814019
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Software Engineer",
+      "page": 0,
+      "bbox": {
+        "x0": 666.6666666666666,
+        "y0": 375.27779473198785,
+        "x1": 940.8665974934895,
+        "y1": 421.0777706570095
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Base Salary:",
+      "page": 0,
+      "bbox": {
+        "x0": 194.44444444444443,
+        "y0": 453.22223239474823,
+        "x1": 394.54438951280383,
+        "y1": 499.1222381591797
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "INR 1,200,000 per annum",
+      "page": 0,
+      "bbox": {
+        "x0": 666.6666666666666,
+        "y0": 453.0555725097656,
+        "x1": 1050.1998901367188,
+        "y1": 498.8555484347873
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Joining Date:",
+      "page": 0,
+      "bbox": {
+        "x0": 194.44444444444443,
+        "y0": 531.000010172526,
+        "x1": 405.5777655707465,
+        "y1": 576.9000159369574
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "2023-08-01",
+      "page": 0,
+      "bbox": {
+        "x0": 666.6666666666666,
+        "y0": 530.8333502875433,
+        "x1": 837.1332804361979,
+        "y1": 576.6333262125651
+      },
+      "conf": 1.0
+    }
+  ],
+  "tables": [],
+  "text_by_page": {
+    "0": "EMPLOYMENT OFFER LETTER\nCandidate Name:\nAnanya Iyer\nDesignation:\nSoftware Engineer\nBase Salary:\nINR 1,200,000 per annum\nJoining Date:\n2023-08-01"
+  },
+  "reader_name": "combined",
+  "meta": {
+    "reader": "combined",
+    "page_dimensions": [
+      {
+        "page": 0,
+        "width": 1700,
+        "height": 2200
+      }
+    ],
+    "line_engines": [
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text"
+    ],
+    "tables": [],
+    "total_lines": 9,
+    "total_tables": 0
+  }
+}

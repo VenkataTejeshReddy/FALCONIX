@@ -1,0 +1,25 @@
+{
+  "doc_id": "d645f538-608c-4631-b916-9fee0864af62",
+  "sha256": "ba59d9d62d0dc61e4aa733ffdcb59cc8fbf33f5d05dfce31c5457860b183e0c9",
+  "pages": 1,
+  "lines": [],
+  "tables": [],
+  "text_by_page": {
+    "0": ""
+  },
+  "reader_name": "combined",
+  "meta": {
+    "reader": "combined",
+    "page_dimensions": [
+      {
+        "page": 0,
+        "width": 1400,
+        "height": 1000
+      }
+    ],
+    "line_engines": [],
+    "tables": [],
+    "total_lines": 0,
+    "total_tables": 0
+  }
+}

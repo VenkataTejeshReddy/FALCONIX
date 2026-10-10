@@ -1,0 +1,159 @@
+{
+  "doc_id": "295ba530-5cdd-4ae5-92fa-35c592f22939",
+  "sha256": "97a5c77d6a1ecf4f997bfd321dadc08426d86825a165a7e10b657737e805a7d9",
+  "pages": 1,
+  "lines": [
+    {
+      "text": "STATEMENT OF MARKS - SEMESTER VIII",
+      "page": 0,
+      "bbox": {
+        "x0": 79.36046522371036,
+        "y0": 69.05594382457059,
+        "x1": 685.7558128189253,
+        "y1": 104.02097878960559
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "applicant_name:",
+      "page": 0,
+      "bbox": {
+        "x0": 95.4154598784819,
+        "y0": 160.68545619294284,
+        "x1": 305.3856060576811,
+        "y1": 199.54590394983686
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Ananya Iyer",
+      "page": 0,
+      "bbox": {
+        "x0": 378.4883690415423,
+        "y0": 162.5874126758352,
+        "x1": 516.8604679642718,
+        "y1": 189.0243901290003
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "SE GOPA",
+      "page": 0,
+      "bbox": {
+        "x0": 374.26215594903,
+        "y0": 198.7292692177145,
+        "x1": 492.5983089794255,
+        "y1": 240.29512094944837
+      },
+      "conf": 0.5
+    },
+    {
+      "text": "marks_or_grade:",
+      "page": 0,
+      "bbox": {
+        "x0": 97.5019097663534,
+        "y0": 205.51976360466907,
+        "x1": 309.48231557384855,
+        "y1": 244.25887797921663
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "institution:",
+      "page": 0,
+      "bbox": {
+        "x0": 95.51763968786373,
+        "y0": 249.4381994211634,
+        "x1": 234.1335225613989,
+        "y1": 281.04960530729994
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "National Institute of Technology",
+      "page": 0,
+      "bbox": {
+        "x0": 380.5232598832561,
+        "y0": 250.00000020748692,
+        "x1": 734.5930192521527,
+        "y1": 278.84615405364065
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Computer Engineering",
+      "page": 0,
+      "bbox": {
+        "x0": 378.4883772719436,
+        "y0": 294.5804192251538,
+        "x1": 632.8488318312698,
+        "y1": 325.2032516501445
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "course:",
+      "page": 0,
+      "bbox": {
+        "x0": 97.4903034144518,
+        "y0": 296.06681059828213,
+        "x1": 193.49806823073598,
+        "y1": 323.85188839356414
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "issue_date:",
+      "page": 0,
+      "bbox": {
+        "x0": 97.176140854507,
+        "y0": 340.2096259853415,
+        "x1": 242.48678309693864,
+        "y1": 376.85890314555917
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "2023-06-20",
+      "page": 0,
+      "bbox": {
+        "x0": 378.4380168251648,
+        "y0": 337.1593236806163,
+        "x1": 512.8410529427185,
+        "y1": 366.0927087159911
+      },
+      "conf": 1.0
+    }
+  ],
+  "tables": [],
+  "text_by_page": {
+    "0": "STATEMENT OF MARKS - SEMESTER VIII\napplicant_name:\nAnanya Iyer\nSE GOPA\nmarks_or_grade:\ninstitution:\nNational Institute of Technology\nComputer Engineering\ncourse:\nissue_date:\n2023-06-20"
+  },
+  "reader_name": "combined",
+  "meta": {
+    "reader": "combined",
+    "page_dimensions": [
+      {
+        "page": 0,
+        "width": 1400,
+        "height": 1000
+      }
+    ],
+    "line_engines": [
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr"
+    ],
+    "tables": [],
+    "total_lines": 11,
+    "total_tables": 0
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "doc_id": "50bb0765-4cc3-484d-a47b-bc4344e0d3be",
+  "sha256": "ab335115c575837159ae8d3c44d5167070741a52ead149d6cda1c65b584cade0",
+  "pages": 1,
+  "lines": [
+    {
+      "text": "GOVERNMENT IDENTIFICATION CARD",
+      "page": 0,
+      "bbox": {
+        "x0": 77.32557694901803,
+        "y0": 69.05594403521542,
+        "x1": 645.0581437825142,
+        "y1": 105.7692307485022
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Applicant Name: P. Sharma",
+      "page": 0,
+      "bbox": {
+        "x0": 99.16666637500003,
+        "y0": 156.97674403935446,
+        "x1": 501.66666637500003,
+        "y1": 197.67441869060042
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "236123456782",
+      "page": 0,
+      "bbox": {
+        "x0": 378.03260237297536,
+        "y0": 201.80421735250542,
+        "x1": 551.8262196215105,
+        "y1": 233.15682403918424
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "ID Number:",
+      "page": 0,
+      "bbox": {
+        "x0": 95.38517457437393,
+        "y0": 205.3232573659596,
+        "x1": 242.640747847079,
+        "y1": 234.07780179080362
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Document Date:",
+      "page": 0,
+      "bbox": {
+        "x0": 99.70930172465907,
+        "y0": 250.00000021010948,
+        "x1": 301.16279102824797,
+        "y1": 278.84615405626334
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "2023-01-15",
+      "page": 0,
+      "bbox": {
+        "x0": 374.3032699569577,
+        "y0": 245.47521035811636,
+        "x1": 510.87114868010224,
+        "y1": 280.94755337612133
+      },
+      "conf": 1.0
+    }
+  ],
+  "tables": [],
+  "text_by_page": {
+    "0": "GOVERNMENT IDENTIFICATION CARD\nApplicant Name: P. Sharma\n236123456782\nID Number:\nDocument Date:\n2023-01-15"
+  },
+  "reader_name": "combined",
+  "meta": {
+    "reader": "combined",
+    "page_dimensions": [
+      {
+        "page": 0,
+        "width": 1400,
+        "height": 1000
+      }
+    ],
+    "line_engines": [
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr"
+    ],
+    "tables": [],
+    "total_lines": 6,
+    "total_tables": 0
+  }
+}

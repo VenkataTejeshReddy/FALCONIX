@@ -1,0 +1,111 @@
+{
+  "doc_id": "f473b9db-a21b-4804-972e-b20a5a7b36fa",
+  "sha256": "eca6dd53f1d6ea2ada8f645b07e458eb44d1ef1a5d1ffb3edd1e554b3e61ee7c",
+  "pages": 1,
+  "lines": [
+    {
+      "text": "GOVERNMENT IDENTIFICATION CARD",
+      "page": 0,
+      "bbox": {
+        "x0": 77.3255769482076,
+        "y0": 69.05594403527127,
+        "x1": 645.0581437817036,
+        "y1": 105.76923074855804
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Applicant Name:",
+      "page": 0,
+      "bbox": {
+        "x0": 95.46496645985874,
+        "y0": 155.56964114009375,
+        "x1": 307.4008986192826,
+        "y1": 192.56570562629727
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Rohhan Verma",
+      "page": 0,
+      "bbox": {
+        "x0": 378.42352299510696,
+        "y0": 156.16878533976296,
+        "x1": 545.4136867982076,
+        "y1": 189.35966929635205
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "236123456782",
+      "page": 0,
+      "bbox": {
+        "x0": 378.03261782646416,
+        "y0": 201.80337304054396,
+        "x1": 551.8677447032952,
+        "y1": 233.1568233621949
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "ID Number:",
+      "page": 0,
+      "bbox": {
+        "x0": 95.36810587099704,
+        "y0": 205.166423206683,
+        "x1": 244.5812673395029,
+        "y1": 234.27555441284863
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "2023-01-15",
+      "page": 0,
+      "bbox": {
+        "x0": 355.8333308407321,
+        "y0": 244.18604699633195,
+        "x1": 519.1666686245455,
+        "y1": 290.6976737401021
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Document Date:",
+      "page": 0,
+      "bbox": {
+        "x0": 99.70930172465907,
+        "y0": 250.00000021010948,
+        "x1": 301.16279102824797,
+        "y1": 278.84615405626334
+      },
+      "conf": 1.0
+    }
+  ],
+  "tables": [],
+  "text_by_page": {
+    "0": "GOVERNMENT IDENTIFICATION CARD\nApplicant Name:\nRohhan Verma\n236123456782\nID Number:\n2023-01-15\nDocument Date:"
+  },
+  "reader_name": "combined",
+  "meta": {
+    "reader": "combined",
+    "page_dimensions": [
+      {
+        "page": 0,
+        "width": 1400,
+        "height": 1000
+      }
+    ],
+    "line_engines": [
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr",
+      "apple_ocr"
+    ],
+    "tables": [],
+    "total_lines": 7,
+    "total_tables": 0
+  }
+}

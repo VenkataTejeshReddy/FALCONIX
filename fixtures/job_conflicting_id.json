@@ -1,0 +1,111 @@
+{
+  "doc_id": "f62939e0-dca1-47c7-a0e3-f5f7e0c62ab8",
+  "sha256": "107273da58367facc8b76f0aebe012ddda2722e27bb5f616162cf9932ea4841d",
+  "pages": 1,
+  "lines": [
+    {
+      "text": "GOVERNMENT IDENTIFICATION CARD",
+      "page": 0,
+      "bbox": {
+        "x0": 166.66666666666666,
+        "y0": 140.94443851047092,
+        "x1": 1097.2166273328992,
+        "y1": 209.79444715711804
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Applicant Name:",
+      "page": 0,
+      "bbox": {
+        "x0": 194.44444444444443,
+        "y0": 297.6666768391927,
+        "x1": 457.44442409939234,
+        "y1": 343.5666614108615
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Rohan Verma",
+      "page": 0,
+      "bbox": {
+        "x0": 666.6666666666666,
+        "y0": 297.49999576144745,
+        "x1": 872.2999572753906,
+        "y1": 343.29999287923175
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "ID Number:",
+      "page": 0,
+      "bbox": {
+        "x0": 194.44444444444443,
+        "y0": 375.44445461697046,
+        "x1": 374.0777757432726,
+        "y1": 421.3444603814019
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "236123456783",
+      "page": 0,
+      "bbox": {
+        "x0": 666.6666666666666,
+        "y0": 375.27779473198785,
+        "x1": 889.0665690104166,
+        "y1": 421.0777706570095
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Document Date:",
+      "page": 0,
+      "bbox": {
+        "x0": 194.44444444444443,
+        "y0": 453.22223239474823,
+        "x1": 450.01110500759546,
+        "y1": 499.1222381591797
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "2023-01-15",
+      "page": 0,
+      "bbox": {
+        "x0": 666.6666666666666,
+        "y0": 453.0555725097656,
+        "x1": 837.1332804361979,
+        "y1": 498.8555484347873
+      },
+      "conf": 1.0
+    }
+  ],
+  "tables": [],
+  "text_by_page": {
+    "0": "GOVERNMENT IDENTIFICATION CARD\nApplicant Name:\nRohan Verma\nID Number:\n236123456783\nDocument Date:\n2023-01-15"
+  },
+  "reader_name": "combined",
+  "meta": {
+    "reader": "combined",
+    "page_dimensions": [
+      {
+        "page": 0,
+        "width": 1700,
+        "height": 2200
+      }
+    ],
+    "line_engines": [
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text"
+    ],
+    "tables": [],
+    "total_lines": 7,
+    "total_tables": 0
+  }
+}

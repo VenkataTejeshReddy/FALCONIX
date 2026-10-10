@@ -1,0 +1,135 @@
+{
+  "doc_id": "ee7753bd-60b6-4726-9e4b-0cc7e16be4e9",
+  "sha256": "e1c2272955092dfcb90d902cccd3b1be180b0d7bf64e666c9846f3b264388b10",
+  "pages": 1,
+  "lines": [
+    {
+      "text": "THE GOLDEN SPOON – DINNER MENU",
+      "page": 0,
+      "bbox": {
+        "x0": 166.66666666666666,
+        "y0": 140.94443851047092,
+        "x1": 1097.316657172309,
+        "y1": 209.79444715711804
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Appetizer:",
+      "page": 0,
+      "bbox": {
+        "x0": 194.44444444444443,
+        "y0": 297.6666768391927,
+        "x1": 357.4111090766059,
+        "y1": 343.5666614108615
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Bruschetta al Pomodoro – $8.00",
+      "page": 0,
+      "bbox": {
+        "x0": 666.6666666666666,
+        "y0": 297.49999576144745,
+        "x1": 1144.6998596191406,
+        "y1": 343.29999287923175
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "First Course:",
+      "page": 0,
+      "bbox": {
+        "x0": 194.44444444444443,
+        "y0": 375.44445461697046,
+        "x1": 401.87776353624133,
+        "y1": 421.3444603814019
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Truffle Tagliatelle – $18.50",
+      "page": 0,
+      "bbox": {
+        "x0": 666.6666666666666,
+        "y0": 375.27779473198785,
+        "x1": 1061.2998962402344,
+        "y1": 421.0777706570095
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Main Course:",
+      "page": 0,
+      "bbox": {
+        "x0": 194.44444444444443,
+        "y0": 453.22223239474823,
+        "x1": 405.5777655707465,
+        "y1": 499.1222381591797
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Pan-Seared Sea Bass – $26.00",
+      "page": 0,
+      "bbox": {
+        "x0": 666.6666666666666,
+        "y0": 453.0555725097656,
+        "x1": 1135.4665120442708,
+        "y1": 498.8555484347873
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Dessert:",
+      "page": 0,
+      "bbox": {
+        "x0": 194.44444444444443,
+        "y0": 531.000010172526,
+        "x1": 327.8110928005642,
+        "y1": 576.9000159369574
+      },
+      "conf": 1.0
+    },
+    {
+      "text": "Classic Tiramisu – $7.50",
+      "page": 0,
+      "bbox": {
+        "x0": 666.6666666666666,
+        "y0": 530.8333502875433,
+        "x1": 1031.5666198730469,
+        "y1": 576.6333262125651
+      },
+      "conf": 1.0
+    }
+  ],
+  "tables": [],
+  "text_by_page": {
+    "0": "THE GOLDEN SPOON – DINNER MENU\nAppetizer:\nBruschetta al Pomodoro – $8.00\nFirst Course:\nTruffle Tagliatelle – $18.50\nMain Course:\nPan-Seared Sea Bass – $26.00\nDessert:\nClassic Tiramisu – $7.50"
+  },
+  "reader_name": "combined",
+  "meta": {
+    "reader": "combined",
+    "page_dimensions": [
+      {
+        "page": 0,
+        "width": 1700,
+        "height": 2200
+      }
+    ],
+    "line_engines": [
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text",
+      "pdf_text"
+    ],
+    "tables": [],
+    "total_lines": 9,
+    "total_tables": 0
+  }
+}
