@@ -16,6 +16,13 @@ import yaml
 from pydantic import BaseModel, Field
 
 # ---------------------------------------------------------------------------
+# Global environment defaults
+# ---------------------------------------------------------------------------
+
+VLM_MODEL: str = os.getenv("VLM_MODEL", os.getenv("OLLAMA_MODEL", "qwen3-vl:4b-instruct"))
+OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+
+# ---------------------------------------------------------------------------
 # Sub-models that mirror YAML structure
 # ---------------------------------------------------------------------------
 

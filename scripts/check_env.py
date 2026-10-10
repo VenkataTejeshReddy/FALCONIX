@@ -1,14 +1,18 @@
-# Owner: Laptop B
+# Owner: Laptop A
 """INX – Environment and Model Stack Verification Script for Laptop A (Mac M4).
 
-Verifies the 7 essential system and model prerequisites:
- 1. Python 3.11, venv activation, and requirements-core / requirements-models imports.
+Verifies the essential system and model prerequisites:
+ 1. Python 3.11, venv activation, and core/model package imports.
  2. Apple Vision OCR (ocrmac) on a test image containing "Priya Sharma 2021001".
  3. Docling PDF conversion on a generated PDF, printing Markdown output.
- 4. Ollama server reachability, qwen3-vl:4b presence, and JSON VLM response timing.
- 5. BGE-M3 and bge-reranker-v2-m3 loading from local HF cache on MPS, embedding, and memory cleanup.
+ 4. Ollama server reachability, VLM_MODEL (default qwen3-vl:4b-instruct), two consecutive calls
+    (cold, then warm) on a REAL marksheet page image from fixtures/synthetic_docs, reporting
+    latency and output tokens, plus `ollama ps`, system memory pressure, and swap used.
+ 5. BGE-M3 (SentenceTransformer) and bge-reranker-v2-m3 (CrossEncoder) on MPS plus rank-bm25,
+    embedding two sentences, printing vector size, and unloading cleanly.
  6. Qdrant local disk mode in data/qdrant (create collection, insert, query).
  7. Peak RSS memory monitoring per step (under 16 GB limit) with OLLAMA_MAX_LOADED_MODELS=1 and short keep_alive.
+ 8. Pytest test suite execution reporting exact numbers (passed, failed, warnings).
 
 Usage:
     python scripts/check_env.py
@@ -20,7 +24,9 @@ import gc
 import json
 import os
 import platform
+import re
 import resource
+import subprocess
 import sys
 import tempfile
 import time
@@ -42,6 +48,9 @@ RESET = "\033[0m"
 
 # Total system RAM limit (16 GB for Laptop A M4)
 RAM_LIMIT_MB = 16.0 * 1024.0
+
+# VLM model name configuration
+DEFAULT_VLM_MODEL = os.getenv("VLM_MODEL", os.getenv("OLLAMA_MODEL", "qwen3-vl:4b-instruct"))
 
 
 def get_peak_rss_mb() -> float:
@@ -78,7 +87,7 @@ class CheckResult:
 
 
 class EnvChecker:
-    """Orchestrates environment checks and prints formatted PASS/FAIL reports."""
+    """Orchestrates environment checks and prints formatted reports."""
 
     def __init__(self) -> None:
         self.results: list[CheckResult] = []
@@ -116,8 +125,9 @@ class EnvChecker:
         if not passed and fix_hint:
             print(f"  {BOLD}{YELLOW}Fix Hint:{RESET} {fix_hint}")
 
+        # Explicit label: "Memory (Python process only)"
         print(
-            f"  {BOLD}Memory:{RESET} Current RSS: {curr_rss:.1f} MB | "
+            f"  {BOLD}Memory (Python process only):{RESET} Current RSS: {curr_rss:.1f} MB | "
             f"Peak RSS: {peak_rss:.1f} MB ({pct_ram:.1f}% of 16 GB limit) | "
             f"Duration: {elapsed:.2f}s"
         )
@@ -185,10 +195,10 @@ class EnvChecker:
             ("docling", "docling"),
             ("ocrmac", "ocrmac"),
             ("rapidocr-onnxruntime", "rapidocr_onnxruntime"),
-            ("FlagEmbedding", "FlagEmbedding"),
             ("sentence-transformers", "sentence_transformers"),
             ("qdrant-client", "qdrant_client"),
             ("ollama", "ollama"),
+            ("rank-bm25", "rank_bm25"),
         ]
 
         missing: list[str] = []
@@ -208,7 +218,7 @@ class EnvChecker:
 
         return (
             True,
-            f"Python {py_ver} in venv ({sys.prefix}). All core and model packages imported successfully.",
+            f"Python {py_ver} in repo .venv ({sys.prefix}). All core and model packages imported successfully.",
             "",
         )
 
@@ -233,12 +243,10 @@ class EnvChecker:
                 "Ensure ocrmac and pillow are installed: pip install ocrmac pillow",
             )
 
-        # Generate test image with text "Priya Sharma 2021001"
         target_text = "Priya Sharma 2021001"
         img = Image.new("RGB", (700, 180), color="white")
         draw = ImageDraw.Draw(img)
 
-        # Try bundled DejaVuSans font or system font, fallback to default
         font_path = self.repo_root / "DejaVuSans.ttf"
         font: Any
         if font_path.exists():
@@ -291,7 +299,6 @@ class EnvChecker:
                 "Install docling and pymupdf: pip install docling pymupdf",
             )
 
-        # Create tiny test PDF
         doc = pymupdf.open()
         page = doc.new_page()
         test_content = (
@@ -334,17 +341,17 @@ class EnvChecker:
                 os.remove(pdf_path)
 
     # -----------------------------------------------------------------------
-    # Step 4: Ollama server, qwen3-vl:4b, and JSON VLM call
+    # Step 4: Ollama server, VLM_MODEL, cold/warm timing, and system metrics
     # -----------------------------------------------------------------------
     def check_ollama(self) -> tuple[bool, str, str]:
         try:
             import ollama
-            from PIL import Image, ImageDraw, ImageFont
+            import pymupdf
         except ImportError as err:
             return (
                 False,
-                f"Failed to import ollama client: {err}",
-                "Install ollama Python package: pip install ollama",
+                f"Failed to import ollama client or pymupdf: {err}",
+                "Install ollama and pymupdf Python packages: pip install ollama pymupdf",
             )
 
         client = ollama.Client()
@@ -363,156 +370,179 @@ class EnvChecker:
                 "Or launch the Ollama macOS desktop app.",
             )
 
-        # 2. Check qwen3-vl:4b presence
-        required_model = "qwen3-vl:4b"
-        matching_model = None
-        for tag in available_tags:
-            if tag == required_model or tag.startswith(f"{required_model}:") or tag == f"{required_model}-instruct":
-                matching_model = tag
-                break
-
-        if not matching_model and required_model not in available_tags:
+        # 2. Check VLM_MODEL presence
+        target_model = DEFAULT_VLM_MODEL
+        if target_model not in available_tags:
             return (
                 False,
-                f"Model '{required_model}' not found in Ollama tags: {available_tags}",
-                f"Pull or alias the model with:\n"
-                f"    ollama pull {required_model}\n"
-                f"If you already have 'qwen3-vl:4b-instruct', run:\n"
-                f"    ollama cp qwen3-vl:4b-instruct {required_model}",
+                f"Model '{target_model}' not found in Ollama tags: {available_tags}",
+                f"Pull the instruct model with:\n"
+                f"    ollama pull {target_model}",
             )
 
-        # Model to use for query
-        target_model = required_model if required_model in available_tags else matching_model
+        print(f"  Active VLM Model: {target_model}")
 
-        # 3. Create small test image with name and id
-        img = Image.new("RGB", (500, 150), color="white")
-        draw = ImageDraw.Draw(img)
-        font_path = self.repo_root / "DejaVuSans.ttf"
-        font = ImageFont.truetype(str(font_path), 30) if font_path.exists() else ImageFont.load_default()
-        draw.text((30, 40), "Name: Priya Sharma\nID: 2021001", fill="black", font=font)
+        # 3. Locate real page image from fixtures/synthetic_docs
+        marksheet_pdf = self.repo_root / "fixtures" / "synthetic_docs" / "college_normal_marksheet.pdf"
+        if not marksheet_pdf.exists():
+            return (
+                False,
+                f"Real marksheet PDF not found at {marksheet_pdf}",
+                "Run 'python scripts/make_synthetic_docs.py --all' to generate fixtures.",
+            )
 
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
             tmp_img_path = tmp.name
-            img.save(tmp_img_path)
 
         try:
-            start_t = time.perf_counter()
-            # keep_alive set short (30s) to keep memory footprint under 16 GB
-            response = client.chat(
+            # Render page 0 of marksheet PDF to PNG
+            doc = pymupdf.open(str(marksheet_pdf))
+            pix = doc[0].get_pixmap(dpi=150)
+            pix.save(tmp_img_path)
+            doc.close()
+
+            vlm_prompt = (
+                "Extract the following 6 fields from this marksheet as valid JSON with exact keys: "
+                '"applicant_name", "course", "institution", "marks_or_grade", "issue_date", "document_title".'
+            )
+
+            # --- CALL 1: Cold ---
+            print(f"  Executing Call 1 (Cold) on real marksheet ({pix.width}x{pix.height})...")
+            t0 = time.perf_counter()
+            resp1 = client.chat(
                 model=target_model,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": "Extract name and id from this document image as valid JSON with keys 'name' and 'id'.",
-                        "images": [tmp_img_path],
-                    }
-                ],
+                messages=[{"role": "user", "content": vlm_prompt, "images": [tmp_img_path]}],
                 format="json",
                 options={"temperature": 0.0},
-                keep_alive="30s",
+                keep_alive="5m",
             )
-            vlm_sec = time.perf_counter() - start_t
-            content_str = response.message.content.strip()
+            sec1 = time.perf_counter() - t0
+            tok1 = getattr(resp1, "eval_count", 0)
+            spd1 = tok1 / sec1 if sec1 > 0 else 0.0
+            print(f"  -> Call 1 (Cold): {sec1:.2f}s | {tok1} output tokens ({spd1:.1f} tok/s)")
 
-            print(f"  VLM call completed in {vlm_sec:.2f} seconds.")
-            print(f"  Raw response:\n{content_str}")
+            # --- CALL 2: Warm ---
+            print("  Executing Call 2 (Warm) on real marksheet...")
+            t0 = time.perf_counter()
+            resp2 = client.chat(
+                model=target_model,
+                messages=[{"role": "user", "content": vlm_prompt, "images": [tmp_img_path]}],
+                format="json",
+                options={"temperature": 0.0},
+                keep_alive="5m",
+            )
+            sec2 = time.perf_counter() - t0
+            tok2 = getattr(resp2, "eval_count", 0)
+            spd2 = tok2 / sec2 if sec2 > 0 else 0.0
+            print(f"  -> Call 2 (Warm): {sec2:.2f}s | {tok2} output tokens ({spd2:.1f} tok/s)")
 
-            parsed_json = json.loads(content_str)
-            print(f"  Parsed JSON object: {parsed_json}")
+            # Validate JSON response
+            content2 = resp2.message.content.strip()
+            parsed = json.loads(content2)
+            print(f"  Parsed JSON fields ({len(parsed)} keys): {parsed}")
+
+            # 4. Report (a) ollama ps, (b) memory pressure, (c) swap usage
+            print(f"\n  {BOLD}[VLM System Metrics after inference]{RESET}")
+            # (a) ollama ps
+            try:
+                ps_proc = subprocess.run(["ollama", "ps"], capture_output=True, text=True, timeout=5)
+                ollama_ps_out = ps_proc.stdout.strip()
+                print(f"  Ollama PS:\n    {ollama_ps_out.replace(chr(10), chr(10) + '    ')}")
+            except Exception as e:
+                print(f"  Ollama PS: error reading ({e})")
+
+            # (b) memory pressure
+            try:
+                mp_proc = subprocess.run(["memory_pressure"], capture_output=True, text=True, timeout=5)
+                free_pct = "N/A"
+                for line in mp_proc.stdout.splitlines():
+                    if "free percentage" in line.lower():
+                        free_pct = line.strip()
+                print(f"  Memory Pressure: {free_pct}")
+            except Exception as e:
+                print(f"  Memory Pressure: error reading ({e})")
+
+            # (c) swap used
+            try:
+                swap_proc = subprocess.run(["sysctl", "vm.swapusage"], capture_output=True, text=True, timeout=5)
+                swap_out = swap_proc.stdout.strip()
+                print(f"  Swap Usage: {swap_out}")
+            except Exception as e:
+                print(f"  Swap Usage: error reading ({e})")
 
             return (
                 True,
-                f"Ollama server reachable. Model '{target_model}' active. JSON VLM call succeeded in {vlm_sec:.2f}s.",
+                f"Model '{target_model}' responded successfully. "
+                f"Cold: {sec1:.2f}s ({tok1} tokens) | Warm: {sec2:.2f}s ({tok2} tokens).",
                 "",
-            )
-        except json.JSONDecodeError as jde:
-            return (
-                False,
-                f"VLM responded in {vlm_sec:.2f}s but output was not valid JSON: {jde}\nResponse: {content_str}",
-                "Check prompt format or verify model capability.",
             )
         except Exception as err:
             return (
                 False,
-                f"Failed during Ollama chat call: {err}",
-                f"Verify that '{target_model}' has sufficient memory and Ollama is functioning.",
+                f"Failed during Ollama VLM evaluation: {err}",
+                f"Verify '{target_model}' is pulled and Ollama has sufficient resources.",
             )
         finally:
             if os.path.exists(tmp_img_path):
                 os.remove(tmp_img_path)
 
     # -----------------------------------------------------------------------
-    # Step 5: BGE-M3 & bge-reranker-v2-m3 on MPS from local HF cache
+    # Step 5: BGE-M3 (SentenceTransformer) & bge-reranker-v2-m3 (CrossEncoder)
     # -----------------------------------------------------------------------
     def check_embeddings_and_reranker(self) -> tuple[bool, str, str]:
         try:
             import torch
-            from FlagEmbedding import BGEM3FlagModel, FlagReranker
-            from huggingface_hub import snapshot_download
+            from rank_bm25 import BM25Okapi
+            from sentence_transformers import CrossEncoder, SentenceTransformer
         except ImportError as err:
             return (
                 False,
-                f"Failed to import FlagEmbedding or torch: {err}",
-                "Install FlagEmbedding and torch: pip install FlagEmbedding torch",
+                f"Failed to import sentence_transformers or rank_bm25: {err}",
+                "Install requirements-models: pip install sentence-transformers rank-bm25",
             )
 
         device = "mps" if torch.backends.mps.is_available() else "cpu"
         print(f"  PyTorch MPS available: {torch.backends.mps.is_available()} (using device: {device})")
         print(f"  PYTORCH_ENABLE_MPS_FALLBACK = {os.environ.get('PYTORCH_ENABLE_MPS_FALLBACK')}")
 
-        # Check local HF cache for BGE-M3
-        bge_local_path: Optional[str] = None
-        try:
-            bge_local_path = snapshot_download("BAAI/bge-m3", local_files_only=True)
-            print(f"  BGE-M3 local cache path: {bge_local_path}")
-        except Exception:
-            # Fall back to repo identifier if local snapshot search fails
-            bge_local_path = "BAAI/bge-m3"
-
-        # Check local HF cache for bge-reranker-v2-m3
-        reranker_local_path: Optional[str] = None
-        try:
-            reranker_local_path = snapshot_download("BAAI/bge-reranker-v2-m3", local_files_only=True)
-            print(f"  bge-reranker-v2-m3 local cache path: {reranker_local_path}")
-        except Exception:
-            reranker_local_path = "BAAI/bge-reranker-v2-m3"
-
-        # 1. Load BGE-M3, embed two sentences, verify vector dimension
-        print("  Loading BGE-M3 model...")
-        model = BGEM3FlagModel(bge_local_path, use_fp16=False, devices=device)
+        # 1. BGE-M3 dense embeddings via SentenceTransformer
+        print("  Loading SentenceTransformer('BAAI/bge-m3')...")
+        model = SentenceTransformer("BAAI/bge-m3", device=device)
         sentences = [
             "INX document verification pipeline ingests applicant certificates.",
             "Priya Sharma submitted graduation marksheet for roll number 2021001.",
         ]
-        res = model.encode(sentences)
-        dense_vecs = res["dense_vecs"]
-        vec_shape = dense_vecs.shape
+        embeddings = model.encode(sentences)
+        vec_shape = embeddings.shape
         vec_dim = vec_shape[1]
-        print(f"  BGE-M3 embedded {len(sentences)} sentences -> dense vector shape: {vec_shape} (dim: {vec_dim})")
+        print(f"  SentenceTransformer embedded {len(sentences)} sentences -> shape: {vec_shape} (dim: {vec_dim})")
 
-        # Unload and free memory
         del model
-        del res
-        del dense_vecs
+        del embeddings
         gc.collect()
         if torch.backends.mps.is_available():
             torch.mps.empty_cache()
-        print("  Unloaded BGE-M3 and cleared MPS cache.")
+        print("  Unloaded SentenceTransformer and cleared MPS cache.")
 
-        # 2. Load bge-reranker-v2-m3, compute score
-        print("  Loading bge-reranker-v2-m3...")
-        reranker = FlagReranker(reranker_local_path, use_fp16=False, devices=device)
+        # 2. CrossEncoder reranker via sentence_transformers
+        print("  Loading CrossEncoder('BAAI/bge-reranker-v2-m3')...")
+        reranker = CrossEncoder("BAAI/bge-reranker-v2-m3", device=device)
         pairs = [["What is the registration number?", "The registration number is 2021001."]]
-        scores = reranker.compute_score(pairs)
-        print(f"  bge-reranker-v2-m3 score: {scores}")
+        scores = reranker.predict(pairs)
+        print(f"  CrossEncoder rerank score: {scores}")
 
-        # Unload and free memory
         del reranker
         del scores
         gc.collect()
         if torch.backends.mps.is_available():
             torch.mps.empty_cache()
-        print("  Unloaded bge-reranker-v2-m3 and cleared MPS cache.")
+        print("  Unloaded CrossEncoder and cleared MPS cache.")
+
+        # 3. BM25 keyword half check
+        corpus = [s.lower().split() for s in sentences]
+        bm25 = BM25Okapi(corpus)
+        bm25_scores = bm25.get_scores(["priya", "marksheet"])
+        print(f"  rank-bm25 BM25Okapi scores: {bm25_scores}")
 
         if vec_dim != 1024:
             return (
@@ -523,7 +553,7 @@ class EnvChecker:
 
         return (
             True,
-            f"BGE-M3 (dim={vec_dim}) and bge-reranker-v2-m3 loaded on {device}, executed inference, and freed memory cleanly.",
+            f"SentenceTransformer (dim={vec_dim}), CrossEncoder reranker, and rank-bm25 verified on {device}.",
             "",
         )
 
@@ -585,13 +615,12 @@ class EnvChecker:
             top_payload = hits[0].payload
             print(f"  Qdrant query top hit score: {hits[0].score:.4f}, payload: {top_payload}")
 
-            # Cleanup test collection
             client.delete_collection(collection_name)
             client.close()
 
             return (
                 True,
-                f"Qdrant local storage operational at {qdrant_path} (created collection, inserted, queried, cleaned up).",
+                f"Qdrant local storage operational at {qdrant_path}.",
                 "",
             )
         except Exception as err:
@@ -639,10 +668,43 @@ class EnvChecker:
 
         return (
             True,
-            f"Peak RSS {peak_rss:.1f} MB is well within 16 GB budget ({pct_used:.1f}%). "
+            f"Peak RSS {peak_rss:.1f} MB is within 16 GB budget ({pct_used:.1f}%). "
             f"OLLAMA_MAX_LOADED_MODELS=1 and short keep_alive verified.",
             "",
         )
+
+    # -----------------------------------------------------------------------
+    # Pytest execution & exact reporting
+    # -----------------------------------------------------------------------
+    def run_pytest_report(self) -> None:
+        print(f"\n{BOLD}{CYAN}======================================================================{RESET}")
+        print(f"{BOLD}[Pytest Suite] Running 'pytest -q'...{RESET}")
+        print(f"{CYAN}======================================================================{RESET}")
+
+        t0 = time.perf_counter()
+        proc = subprocess.run(
+            [sys.executable, "-m", "pytest", "-q"],
+            capture_output=True,
+            text=True,
+            cwd=str(self.repo_root),
+        )
+        elapsed = time.perf_counter() - t0
+
+        stdout_lines = proc.stdout.strip().splitlines()
+        stderr_lines = proc.stderr.strip().splitlines()
+
+        summary_line = stdout_lines[-1] if stdout_lines else "No output from pytest"
+        print(f"  {BOLD}Pytest summary:{RESET} {summary_line} (elapsed: {elapsed:.2f}s)")
+
+        if proc.returncode != 0:
+            print(f"  {BOLD}{RED}Failures detected:{RESET}")
+            for line in stdout_lines:
+                if "FAILED" in line or "ERROR" in line:
+                    print(f"    {line}")
+            if stderr_lines:
+                print(f"  STDERR:\n    {proc.stderr}")
+        else:
+            print(f"  {BOLD}{GREEN}All tests passing without failures.{RESET}")
 
     # -----------------------------------------------------------------------
     # Summary
@@ -655,10 +717,13 @@ class EnvChecker:
         self.run_check(1, "Python 3.11 & Package Imports", self.check_python_and_packages)
         self.run_check(2, "Apple Vision OCR (ocrmac)", self.check_ocrmac)
         self.run_check(3, "Docling PDF Parsing", self.check_docling)
-        self.run_check(4, "Ollama Server & Qwen3-VL VLM JSON", self.check_ollama)
-        self.run_check(5, "BGE-M3 & bge-reranker-v2-m3 on MPS", self.check_embeddings_and_reranker)
+        self.run_check(4, f"Ollama VLM ({DEFAULT_VLM_MODEL}) Cold/Warm & System Pressure", self.check_ollama)
+        self.run_check(5, "BGE-M3 (SentenceTransformer) & Reranker on MPS", self.check_embeddings_and_reranker)
         self.run_check(6, "Qdrant Local Disk Mode", self.check_qdrant_local)
         self.run_check(7, "Memory Budget (<16 GB) & Ollama Limits", self.check_memory_and_ollama_config)
+
+        # Pytest reporting: exact numbers reported without summarizing as pass/fail
+        self.run_pytest_report()
 
         print(f"\n{BOLD}======================================================================{RESET}")
         print(f"{BOLD}VERIFICATION SUMMARY{RESET}")
@@ -667,7 +732,7 @@ class EnvChecker:
         all_passed = True
         for r in self.results:
             status_str = f"{BOLD}{GREEN}PASS{RESET}" if r.passed else f"{BOLD}{RED}FAIL{RESET}"
-            print(f"Step {r.step_num}: [{status_str}] {r.name:<38} (Peak RSS: {r.rss_mb:6.1f} MB, {r.elapsed_sec:5.2f}s)")
+            print(f"Step {r.step_num}: [{status_str}] {r.name:<48} (Peak RSS: {r.rss_mb:6.1f} MB, {r.elapsed_sec:5.2f}s)")
             if not r.passed:
                 all_passed = False
                 print(f"       -> Reason: {r.details}")
@@ -676,14 +741,9 @@ class EnvChecker:
 
         print(f"{BOLD}----------------------------------------------------------------------{RESET}")
         final_peak = get_peak_rss_mb()
-        print(f"Final Peak RSS: {final_peak:.1f} MB / {RAM_LIMIT_MB:.0f} MB ({(final_peak / RAM_LIMIT_MB) * 100:.1f}%)")
+        print(f"Final Peak RSS (Python process only): {final_peak:.1f} MB / {RAM_LIMIT_MB:.0f} MB ({(final_peak / RAM_LIMIT_MB) * 100:.1f}%)")
 
-        if all_passed:
-            print(f"{BOLD}{GREEN}ALL 7 CHECKS PASSED! Laptop A environment is ready for INX pipeline.{RESET}\n")
-            return True
-        else:
-            print(f"{BOLD}{RED}SOME CHECKS FAILED. Please review the fix hints above.{RESET}\n")
-            return False
+        return all_passed
 
 
 def main() -> None:
