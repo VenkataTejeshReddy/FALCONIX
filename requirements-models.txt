@@ -1,0 +1,11 @@
+# INX – Model requirements (Laptop A only)
+# Install with: pip install -r requirements-models.txt
+# Requires: requirements-core.txt already installed
+
+docling>=2.0
+ocrmac>=0.3          # Apple Vision OCR – macOS only
+rapidocr-onnxruntime>=1.3
+FlagEmbedding>=1.2   # BGE-M3 + bge-reranker-v2-m3
+sentence-transformers>=3.0
+qdrant-client>=1.9
+ollama>=0.2          # Ollama Python client for Qwen3-VL

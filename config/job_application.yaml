@@ -1,0 +1,167 @@
+name: job_application
+description: >
+  Processing pipeline for job applications submitted via email.
+  Each case must include a résumé/CV and a valid government ID.
+
+# ── Expected document types ──────────────────────────────────────────────────
+documents:
+  resume:
+    required: true
+    fields:
+      applicant_name:
+        required: true
+        validators: [non_empty, no_digits]
+        description: "Full legal name of the applicant"
+      email:
+        required: true
+        validators: [non_empty, email_format]
+        description: "Contact email address"
+      phone:
+        required: false
+        validators: [phone_format]
+        description: "Contact phone number"
+      highest_qualification:
+        required: true
+        validators: [non_empty]
+        description: "Highest academic qualification (e.g. B.Tech, MBA)"
+      institution:
+        required: true
+        validators: [non_empty]
+        description: "Institution where the highest qualification was obtained"
+      years_experience:
+        required: true
+        validators: [non_empty, number_range]
+        min: 0
+        max: 60
+        description: "Total years of relevant professional experience (0-60)"
+
+  id_document:
+    required: true
+    fields:
+      applicant_name:
+        required: true
+        validators: [non_empty, no_digits]
+        description: "Name as printed on the ID document"
+      id_number:
+        required: true
+        validators: [non_empty, govt_id_format]
+        description: "Government-issued identification number (12 digits + Verhoeff)"
+      document_date:
+        required: false
+        validators: [date_format]
+        description: "Expiry or issue date on the ID"
+
+# ── Quality thresholds ────────────────────────────────────────────────────────
+thresholds:
+  min_field_confidence: 0.70
+  fuzzy_exact: 95
+  fuzzy_near: 85
+  long_doc_pages: 3
+
+# ── Cross-document validation & provenance ────────────────────────────────────
+crossdoc:
+  compare:
+    - applicant_name
+    - id_number
+  compare_sender_email:
+    - email
+
+# ── Policy rules ──────────────────────────────────────────────────────────────
+# Rule execution semantics:
+#   - All matching rules fire.
+#   - Lowest priority number sets the route.
+#   - All reasons from all firing rules are kept.
+#   - If no rule fires, the route is HUMAN_REVIEW.
+#
+# Context variables available in `if` expressions:
+#   has_conflict     – any field has status=conflict
+#   has_unreliable   – any field has status=unreliable
+#   has_unclear      – any field has status=unclear
+#   has_missing      – includes missing required documents or missing required fields
+#   has_unknown_doc  – any document classified as unknown type
+#   has_poor_quality – any document with verdict poor
+#   all_valid        – no issues of any kind AND all required docs present AND all required fields valid
+rules:
+  - id: R01
+    priority: 10
+    if: "has_conflict"
+    route: MANUAL_VERIFICATION
+    status: review_required
+    reason: >
+      One or more fields extracted from different documents do not match.
+      A human reviewer must reconcile the conflicting values before
+      the application can proceed.
+    applicant_message: >
+      There is a discrepancy between the information in your submitted documents.
+      A reviewer will verify the details.
+
+  - id: R02
+    priority: 20
+    if: "has_unreliable"
+    route: HUMAN_REVIEW
+    status: review_required
+    reason: >
+      One or more fields have low-confidence OCR scores, indicating the
+      source document may be of poor quality or illegible. The application
+      has been flagged for human review.
+    applicant_message: >
+      Some details in your submitted documents could not be read with high confidence.
+      Our team is reviewing the documents manually.
+
+  - id: R07
+    priority: 22
+    if: "has_unclear"
+    route: HUMAN_REVIEW
+    status: review_required
+    reason: >
+      One or more extracted fields are unclear or ambiguous, requiring human
+      review to confirm interpretation.
+    applicant_message: >
+      Certain details in your application require manual review by our team.
+
+  - id: R03
+    priority: 25
+    if: "has_poor_quality"
+    route: HUMAN_REVIEW
+    status: review_required
+    reason: >
+      One or more uploaded documents received a quality verdict of poor.
+    applicant_message: >
+      One or more uploaded documents did not meet the minimum image quality
+      threshold. Please be prepared to resubmit clearer copies if requested.
+
+  - id: R04
+    priority: 30
+    if: "has_unknown_doc"
+    route: HUMAN_REVIEW
+    status: review_required
+    reason: >
+      One or more attached files could not be classified as a known document
+      type. Human review is required to verify the submission.
+    applicant_message: >
+      One or more attached files could not be recognized as expected document
+      types. A reviewer is verifying your submission.
+
+  - id: R05
+    priority: 40
+    if: "has_missing"
+    route: REQUEST_INFO
+    status: awaiting_information
+    reason: >
+      Your application is incomplete. One or more required fields or documents
+      are missing.
+    applicant_message: >
+      Your application is incomplete. One or more required fields or documents
+      are missing. Please resubmit with the missing information.
+
+  - id: R06
+    priority: 100
+    if: "all_valid"
+    route: PROCESS
+    status: verified
+    reason: >
+      All required fields and documents have been verified successfully.
+      No issues of any kind were detected.
+    applicant_message: >
+      All required fields and documents have been verified successfully.
+      Your application has been forwarded for processing.

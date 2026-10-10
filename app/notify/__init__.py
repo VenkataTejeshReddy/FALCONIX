@@ -1,0 +1,1 @@
+"""INX – Notify package."""

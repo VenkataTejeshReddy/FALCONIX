@@ -1,0 +1,173 @@
+name: college
+description: >
+  Processing pipeline for college/university document submissions (marksheets,
+  transcripts, certificates, and registration letters).
+
+# ── Expected document types ──────────────────────────────────────────────────
+documents:
+  marksheet:
+    required: true
+    fields:
+      applicant_name:
+        required: true
+        validators: [non_empty, no_digits]
+        description: "Full name as printed on the marksheet"
+      marks_or_grade:
+        required: true
+        validators: [non_empty, grade_format]
+        description: "Marks obtained or letter/CGPA grade"
+      institution:
+        required: true
+        validators: [non_empty]
+        description: "Name of the issuing institution"
+      course:
+        required: true
+        validators: [non_empty]
+        description: "Course or programme name"
+      issue_date:
+        required: true
+        validators: [non_empty, date_format]
+        description: "Date the marksheet was issued"
+
+  id_document:
+    required: true
+    fields:
+      applicant_name:
+        required: true
+        validators: [non_empty, no_digits]
+        description: "Name as printed on the ID"
+      date_of_birth:
+        required: true
+        validators: [non_empty, date_format, dob_range]
+        description: "Date of birth of the applicant"
+      id_number:
+        required: true
+        validators: [non_empty, govt_id_format]
+        description: "Government-issued identification number (12 digits + Verhoeff)"
+
+  registration_letter:
+    required: false
+    fields:
+      applicant_name:
+        required: true
+        validators: [non_empty, no_digits]
+      registration_number:
+        required: true
+        validators: [non_empty, registration_format]
+        regex: "^[A-Z0-9-]{6,20}$"
+        description: "Institution-assigned registration or roll number"
+      institution:
+        required: true
+        validators: [non_empty]
+
+# ── Quality thresholds ────────────────────────────────────────────────────────
+thresholds:
+  min_field_confidence: 0.70
+  fuzzy_exact: 95
+  fuzzy_near: 85
+  long_doc_pages: 3
+
+# ── Cross-document validation & provenance ────────────────────────────────────
+crossdoc:
+  compare:
+    - applicant_name
+    - institution
+
+# ── Policy rules ──────────────────────────────────────────────────────────────
+# Rule execution semantics:
+#   - All matching rules fire.
+#   - Lowest priority number sets the route.
+#   - All reasons from all firing rules are kept.
+#   - If no rule fires, the route is HUMAN_REVIEW.
+#
+# Context variables available in `if` expressions:
+#   has_conflict     – any field has status=conflict
+#   has_unreliable   – any field has status=unreliable
+#   has_unclear      – any field has status=unclear
+#   has_missing      – includes missing required documents or missing required fields
+#   has_unknown_doc  – any document classified as unknown type
+#   has_poor_quality – any document with verdict poor
+#   all_valid        – no issues of any kind AND all required docs present AND all required fields valid
+rules:
+  - id: R01
+    priority: 10
+    if: "has_conflict"
+    route: MANUAL_VERIFICATION
+    status: review_required
+    reason: >
+      Conflicting information was detected across submitted documents
+      (e.g. name or date of birth mismatch). A human reviewer will
+      investigate and contact you if further action is needed.
+    applicant_message: >
+      There are discrepancies between the details in your submitted documents.
+      Our team is manually verifying the submission.
+
+  - id: R02
+    priority: 20
+    if: "has_unreliable"
+    route: HUMAN_REVIEW
+    status: review_required
+    reason: >
+      One or more fields could not be extracted reliably due to low document
+      quality. The case has been escalated for human review.
+    applicant_message: >
+      Some information could not be verified automatically due to scan quality.
+      Your submission has been escalated for human review.
+
+  - id: R07
+    priority: 22
+    if: "has_unclear"
+    route: HUMAN_REVIEW
+    status: review_required
+    reason: >
+      One or more fields are unclear or ambiguous and could not be determined
+      with sufficient confidence. Human review is required.
+    applicant_message: >
+      Certain details in your academic documents require human review.
+
+  - id: R03
+    priority: 25
+    if: "has_poor_quality"
+    route: HUMAN_REVIEW
+    status: review_required
+    reason: >
+      At least one document received a quality verdict of poor.
+    applicant_message: >
+      At least one document did not meet our quality standards. Please be
+      prepared to resubmit higher-resolution scans or clear photographs if requested.
+
+  - id: R04
+    priority: 30
+    if: "has_unknown_doc"
+    route: HUMAN_REVIEW
+    status: review_required
+    reason: >
+      One or more uploaded files could not be identified as a recognised
+      document type and require human review.
+    applicant_message: >
+      One or more uploaded files could not be recognized as expected document
+      types. A reviewer will assess them manually.
+
+  - id: R05
+    priority: 40
+    if: "has_missing"
+    route: REQUEST_INFO
+    status: awaiting_information
+    reason: >
+      Your submission is incomplete. One or more required fields or documents
+      are missing.
+    applicant_message: >
+      Your submission is incomplete. One or more required fields or documents
+      are missing. Please reply with the missing information attached.
+
+  - id: R06
+    priority: 100
+    if: "all_valid"
+    route: PROCESS
+    status: verified
+    reason: >
+      All required documents and fields have been verified. No issues of any
+      kind were detected.
+    applicant_message: >
+      All required documents and fields have been verified. Your submission
+      has been accepted and forwarded for processing.

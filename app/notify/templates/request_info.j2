@@ -1,0 +1,23 @@
+{% set route = case.route.value if case.route else "UNKNOWN" -%}
+Subject: Your Application – Action Required
+
+Dear {{ case.sender_name or case.sender_email }},
+
+Thank you for submitting your application.
+
+We have reviewed your submission and found that one or more required pieces
+of information are missing or could not be verified.
+
+{% if case.issues %}
+Issues detected:
+{% for issue in case.issues %}
+  • {{ issue.field }}: {{ issue.detail }}
+{% endfor %}
+{% endif %}
+
+Please reply to this email with the missing documents or information.
+
+Reference: {{ case.case_id }}
+
+Regards,
+INX Processing Team
