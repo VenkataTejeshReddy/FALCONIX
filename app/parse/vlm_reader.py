@@ -13,6 +13,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
+from app.config import OLLAMA_BASE_URL, VLM_MODEL
 from app.parse.base import Reader
 from app.schemas import DocumentRecord, ParsedDocument
 
@@ -25,7 +26,7 @@ class VLMReader:
     ollama_base_url:
         Base URL of the Ollama API server.
     model:
-        Model tag to use (default ``"qwen3-vl:4b"``).
+        Model tag to use (default from ``app.config.VLM_MODEL``, e.g. ``"qwen3-vl:4b-instruct"``).
     prompt_template:
         Optional Jinja2 template string for the VLM prompt.  If ``None``,
         the built-in extraction prompt is used.
@@ -35,8 +36,8 @@ class VLMReader:
 
     def __init__(
         self,
-        ollama_base_url: str = "http://localhost:11434",
-        model: str = "qwen3-vl:4b",
+        ollama_base_url: str = OLLAMA_BASE_URL,
+        model: str = VLM_MODEL,
         prompt_template: Optional[str] = None,
     ) -> None:
         self._base_url = ollama_base_url

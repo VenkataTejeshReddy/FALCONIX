@@ -112,3 +112,23 @@ forming a chain. `audit.verify_chain()` validates integrity on demand.
 
 **Consequences:** Performance overhead per append is one SHA-256 operation.
 The chain must be reset explicitly when rolling over to a new log file.
+
+---
+
+## ADR-008: Standardized embedding and retrieval stack
+
+**Status:** Accepted
+
+**Context:** INX requires dense vector representations and reranking for RAG on long
+documents. We evaluated `FlagEmbedding` vs `sentence-transformers` + `rank-bm25`.
+`FlagEmbedding` introduces heavy extraneous dependencies (`accelerate`, `datasets`,
+`ir-datasets`, `peft`) and multi-vector overhead.
+
+**Decision:** Standardize on ONE embedding and retrieval path in project code:
+- `sentence-transformers`: `SentenceTransformer("BAAI/bge-m3")` for dense 1024-d embeddings.
+- `sentence-transformers`: `CrossEncoder("BAAI/bge-reranker-v2-m3")` for reranking.
+- `rank-bm25`: `BM25Okapi` for lexical keyword search in hybrid retrieval.
+
+**Consequences:** Clean dependency tree, direct HuggingFace cache loading on Apple Silicon
+MPS, and reproducible lockfile across environments.
+
