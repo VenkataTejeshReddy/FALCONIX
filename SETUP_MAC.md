@@ -74,8 +74,8 @@ For the Ollama macOS GUI application, system-level environment variables must be
 # Set max loaded models to 1 (avoids loading multiple VLMs into VRAM simultaneously)
 launchctl setenv OLLAMA_MAX_LOADED_MODELS "1"
 
-# Set keep-alive to 5 minutes (or 30s) so idle models unload automatically
-launchctl setenv OLLAMA_KEEP_ALIVE "5m"
+# Set keep-alive to 30s so idle models unload automatically
+launchctl setenv OLLAMA_KEEP_ALIVE "30s"
 
 # Restart the Ollama macOS application to apply settings
 killall Ollama || true
@@ -87,7 +87,7 @@ Also add these to your shell profile (`~/.zshrc`) or project `.env`:
 
 ```bash
 export OLLAMA_MAX_LOADED_MODELS=1
-export OLLAMA_KEEP_ALIVE=5m
+export OLLAMA_KEEP_ALIVE=30s
 export PYTORCH_ENABLE_MPS_FALLBACK=1
 export VLM_MODEL=qwen3-vl:4b-instruct
 ```
@@ -145,7 +145,7 @@ OLLAMA_BASE_URL=http://localhost:11434
 VLM_MODEL=qwen3-vl:4b-instruct
 OLLAMA_MODEL=qwen3-vl:4b-instruct
 OLLAMA_MAX_LOADED_MODELS=1
-OLLAMA_KEEP_ALIVE=5m
+OLLAMA_KEEP_ALIVE=30s
 
 # PyTorch MPS Fallback for Apple Silicon
 PYTORCH_ENABLE_MPS_FALLBACK=1
