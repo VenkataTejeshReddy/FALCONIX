@@ -1,0 +1,439 @@
+{
+  "job_normal_resume.pdf": {
+    "scenario": "job_application",
+    "doc_type": "resume",
+    "true_fields": {
+      "applicant_name": "Rohan Verma",
+      "email": "rohan.verma@example.com",
+      "phone": "+91 98765 43210",
+      "highest_qualification": "B.Tech Computer Science",
+      "institution": "Indian Institute of Technology",
+      "years_experience": "4"
+    },
+    "altered_field": null,
+    "defect": "none",
+    "details": "Clean normal resume"
+  },
+  "job_normal_id.jpg": {
+    "scenario": "job_application",
+    "doc_type": "id_document",
+    "true_fields": {
+      "applicant_name": "Rohan Verma",
+      "id_number": "236123456782",
+      "document_date": "2023-01-15"
+    },
+    "altered_field": null,
+    "defect": "none",
+    "details": "Clean normal ID document"
+  },
+  "job_missing_field_resume.pdf": {
+    "scenario": "job_application",
+    "doc_type": "resume",
+    "true_fields": {
+      "applicant_name": "Rohan Verma",
+      "email": "rohan.verma@example.com",
+      "phone": "+91 98765 43210",
+      "highest_qualification": "B.Tech Computer Science",
+      "institution": "Indian Institute of Technology",
+      "years_experience": "4"
+    },
+    "altered_field": "email",
+    "defect": "missing",
+    "details": "email and years_experience omitted"
+  },
+  "job_name_typo_id.jpg": {
+    "scenario": "job_application",
+    "doc_type": "id_document",
+    "true_fields": {
+      "applicant_name": "Rohan Verma",
+      "id_number": "236123456782",
+      "document_date": "2023-01-15"
+    },
+    "altered_field": "applicant_name",
+    "defect": "typo",
+    "details": "Name misspelled as Rohhan Verma"
+  },
+  "job_initials_typo_id.jpg": {
+    "scenario": "job_application",
+    "doc_type": "id_document",
+    "true_fields": {
+      "applicant_name": "Priya Sharma",
+      "id_number": "236123456782",
+      "document_date": "2023-01-15"
+    },
+    "altered_field": "applicant_name",
+    "defect": "typo",
+    "details": "Name shortened to P. Sharma"
+  },
+  "job_conflicting_id.pdf": {
+    "scenario": "job_application",
+    "doc_type": "id_document",
+    "true_fields": {
+      "applicant_name": "Rohan Verma",
+      "id_number": "236123456782",
+      "document_date": "2023-01-15"
+    },
+    "altered_field": "id_number",
+    "defect": "bad_checksum",
+    "details": "ID has invalid Verhoeff check digit"
+  },
+  "job_unclear_stamp_id.jpg": {
+    "scenario": "job_application",
+    "doc_type": "id_document",
+    "true_fields": {
+      "applicant_name": "Rohan Verma",
+      "id_number": "236123456782",
+      "document_date": "2023-01-15"
+    },
+    "altered_field": "id_number",
+    "defect": "obscured",
+    "details": "ID number obscured by red stamp overlay"
+  },
+  "job_blurry_photo_resume.jpg": {
+    "scenario": "job_application",
+    "doc_type": "resume",
+    "true_fields": {
+      "applicant_name": "Rohan Verma",
+      "email": "rohan.verma@example.com",
+      "phone": "+91 98765 43210",
+      "highest_qualification": "B.Tech Computer Science",
+      "institution": "Indian Institute of Technology",
+      "years_experience": "4"
+    },
+    "altered_field": null,
+    "defect": "blur",
+    "details": "Blurry camera capture causing poor quality score"
+  },
+  "job_unknown_menu.pdf": {
+    "scenario": "job_application",
+    "doc_type": "unknown",
+    "true_fields": {},
+    "altered_field": null,
+    "defect": "unknown_type",
+    "details": "Restaurant dinner menu document"
+  },
+  "job_unexpected_marksheet.pdf": {
+    "scenario": "job_application",
+    "doc_type": "marksheet",
+    "true_fields": {},
+    "altered_field": null,
+    "defect": "unknown_type",
+    "details": "Marksheet not expected in job_application scenario"
+  },
+  "job_mislabeled_id_as_marksheet.pdf": {
+    "scenario": "job_application",
+    "doc_type": "id_document",
+    "true_fields": {
+      "applicant_name": "Rohan Verma",
+      "id_number": "236123456782",
+      "document_date": "2023-01-15"
+    },
+    "altered_field": null,
+    "defect": "conflict",
+    "details": "File mislabeled as marksheet.pdf but contains an ID card"
+  },
+  "scan001.pdf": {
+    "scenario": "job_application",
+    "doc_type": "resume",
+    "true_fields": {
+      "applicant_name": "Rohan Verma",
+      "email": "rohan.verma@example.com",
+      "phone": "+91 98765 43210",
+      "highest_qualification": "B.Tech Computer Science",
+      "institution": "Indian Institute of Technology",
+      "years_experience": "4"
+    },
+    "altered_field": null,
+    "defect": "none",
+    "details": "Neutral name scan001.pdf containing valid resume"
+  },
+  "IMG_2041.jpg": {
+    "scenario": "job_application",
+    "doc_type": "id_document",
+    "true_fields": {
+      "applicant_name": "Rohan Verma",
+      "id_number": "236123456782",
+      "document_date": "2023-01-15"
+    },
+    "altered_field": null,
+    "defect": "none",
+    "details": "Neutral name IMG_2041.jpg containing valid ID"
+  },
+  "job_prompt_injection.pdf": {
+    "scenario": "job_application",
+    "doc_type": "resume",
+    "true_fields": {
+      "applicant_name": "Rohan Verma",
+      "email": "rohan.verma@example.com",
+      "phone": "+91 98765 43210",
+      "highest_qualification": "B.Tech Computer Science",
+      "institution": "Indian Institute of Technology",
+      "years_experience": "4"
+    },
+    "altered_field": null,
+    "defect": "injection",
+    "details": "Prompt injection attack vector in text field"
+  },
+  "job_6page_differing_page5.pdf": {
+    "scenario": "job_application",
+    "doc_type": "id_document",
+    "true_fields": {
+      "applicant_name": "Rohan Verma",
+      "id_number": "236123456782",
+      "document_date": "2023-01-15"
+    },
+    "altered_field": "id_number",
+    "defect": "conflict",
+    "details": "6-page PDF where ID number differs on page 5"
+  },
+  "college_normal_marksheet.pdf": {
+    "scenario": "college",
+    "doc_type": "marksheet",
+    "true_fields": {
+      "applicant_name": "Ananya Iyer",
+      "marks_or_grade": "8.8 CGPA",
+      "institution": "National Institute of Technology",
+      "course": "Computer Engineering",
+      "issue_date": "2023-06-20"
+    },
+    "altered_field": null,
+    "defect": "none",
+    "details": "Clean normal marksheet"
+  },
+  "college_normal_id.jpg": {
+    "scenario": "college",
+    "doc_type": "id_document",
+    "true_fields": {
+      "applicant_name": "Ananya Iyer",
+      "date_of_birth": "2001-04-12",
+      "id_number": "348912345678"
+    },
+    "altered_field": null,
+    "defect": "none",
+    "details": "Clean normal college ID"
+  },
+  "college_normal_reg_letter.pdf": {
+    "scenario": "college",
+    "doc_type": "registration_letter",
+    "true_fields": {
+      "applicant_name": "Ananya Iyer",
+      "registration_number": "NIT-2021-0045",
+      "institution": "National Institute of Technology"
+    },
+    "altered_field": null,
+    "defect": "none",
+    "details": "Clean normal registration letter"
+  },
+  "college_missing_date_marksheet.pdf": {
+    "scenario": "college",
+    "doc_type": "marksheet",
+    "true_fields": {
+      "applicant_name": "Ananya Iyer",
+      "marks_or_grade": "8.8 CGPA",
+      "institution": "National Institute of Technology",
+      "course": "Computer Engineering",
+      "issue_date": "2023-06-20"
+    },
+    "altered_field": "issue_date",
+    "defect": "missing",
+    "details": "issue_date omitted from marksheet"
+  },
+  "college_name_typo_id.jpg": {
+    "scenario": "college",
+    "doc_type": "id_document",
+    "true_fields": {
+      "applicant_name": "Ananya Iyer",
+      "date_of_birth": "2001-04-12",
+      "id_number": "348912345678"
+    },
+    "altered_field": "applicant_name",
+    "defect": "typo",
+    "details": "Name misspelled as Ananya Iyyar"
+  },
+  "college_initials_typo_id.jpg": {
+    "scenario": "college",
+    "doc_type": "id_document",
+    "true_fields": {
+      "applicant_name": "Priya Sharma",
+      "date_of_birth": "2001-04-12",
+      "id_number": "348912345678"
+    },
+    "altered_field": "applicant_name",
+    "defect": "typo",
+    "details": "Name shortened to P. Sharma"
+  },
+  "college_future_dob_id.pdf": {
+    "scenario": "college",
+    "doc_type": "id_document",
+    "true_fields": {
+      "applicant_name": "Ananya Iyer",
+      "date_of_birth": "2001-04-12",
+      "id_number": "348912345678"
+    },
+    "altered_field": "date_of_birth",
+    "defect": "conflict",
+    "details": "Impossible future date of birth"
+  },
+  "college_unclear_stamp_marksheet.jpg": {
+    "scenario": "college",
+    "doc_type": "marksheet",
+    "true_fields": {
+      "applicant_name": "Ananya Iyer",
+      "marks_or_grade": "8.8 CGPA",
+      "institution": "National Institute of Technology",
+      "course": "Computer Engineering",
+      "issue_date": "2023-06-20"
+    },
+    "altered_field": "marks_or_grade",
+    "defect": "obscured",
+    "details": "Marks value obscured by stamp"
+  },
+  "college_blurry_photo_marksheet.jpg": {
+    "scenario": "college",
+    "doc_type": "marksheet",
+    "true_fields": {
+      "applicant_name": "Ananya Iyer",
+      "marks_or_grade": "8.8 CGPA",
+      "institution": "National Institute of Technology",
+      "course": "Computer Engineering",
+      "issue_date": "2023-06-20"
+    },
+    "altered_field": null,
+    "defect": "blur",
+    "details": "Blurry phone photo of marksheet"
+  },
+  "college_unknown_menu.pdf": {
+    "scenario": "college",
+    "doc_type": "unknown",
+    "true_fields": {},
+    "altered_field": null,
+    "defect": "unknown_type",
+    "details": "Restaurant dinner menu document"
+  },
+  "college_unexpected_offer_letter.pdf": {
+    "scenario": "college",
+    "doc_type": "offer_letter",
+    "true_fields": {},
+    "altered_field": null,
+    "defect": "unknown_type",
+    "details": "Offer letter not expected in college scenario"
+  },
+  "college_mislabeled_id_as_marksheet.pdf": {
+    "scenario": "college",
+    "doc_type": "id_document",
+    "true_fields": {
+      "applicant_name": "Ananya Iyer",
+      "date_of_birth": "2001-04-12",
+      "id_number": "348912345678"
+    },
+    "altered_field": null,
+    "defect": "conflict",
+    "details": "File named marksheet.pdf that is really an ID card"
+  },
+  "college_prompt_injection.pdf": {
+    "scenario": "college",
+    "doc_type": "marksheet",
+    "true_fields": {
+      "applicant_name": "Ananya Iyer",
+      "marks_or_grade": "8.8 CGPA",
+      "institution": "National Institute of Technology",
+      "course": "Computer Engineering",
+      "issue_date": "2023-06-20"
+    },
+    "altered_field": null,
+    "defect": "injection",
+    "details": "Prompt injection attack vector in text field"
+  },
+  "college_6page_differing_page5.pdf": {
+    "scenario": "college",
+    "doc_type": "marksheet",
+    "true_fields": {
+      "applicant_name": "Ananya Iyer",
+      "marks_or_grade": "8.8 CGPA",
+      "institution": "National Institute of Technology",
+      "course": "Computer Engineering",
+      "issue_date": "2023-06-20"
+    },
+    "altered_field": "marks_or_grade",
+    "defect": "conflict",
+    "details": "6-page PDF where marks/grade differs on page 5"
+  },
+  "hard_tilted_resume.jpg": {
+    "scenario": "job_application",
+    "doc_type": "resume",
+    "true_fields": {
+      "applicant_name": "Rohan Verma",
+      "email": "rohan.verma@example.com",
+      "phone": "+91 98765 43210",
+      "highest_qualification": "B.Tech Computer Science",
+      "institution": "Indian Institute of Technology",
+      "years_experience": "4"
+    },
+    "altered_field": null,
+    "defect": "none",
+    "details": "Tilted 3.8 deg and downscaled to 900px"
+  },
+  "hard_perspective_id.jpg": {
+    "scenario": "job_application",
+    "doc_type": "id_document",
+    "true_fields": {
+      "applicant_name": "Rohan Verma",
+      "id_number": "236123456782",
+      "document_date": "2023-01-15"
+    },
+    "altered_field": null,
+    "defect": "none",
+    "details": "Perspective warped phone angle with JPEG Q35"
+  },
+  "hard_shadow_marksheet.jpg": {
+    "scenario": "college",
+    "doc_type": "marksheet",
+    "true_fields": {
+      "applicant_name": "Ananya Iyer",
+      "marks_or_grade": "8.8 CGPA",
+      "institution": "National Institute of Technology",
+      "course": "Computer Engineering",
+      "issue_date": "2023-06-20"
+    },
+    "altered_field": null,
+    "defect": "none",
+    "details": "Document with non-uniform lighting shadow gradient"
+  },
+  "hard_grainy_id.jpg": {
+    "scenario": "college",
+    "doc_type": "id_document",
+    "true_fields": {
+      "applicant_name": "Ananya Iyer",
+      "date_of_birth": "2001-04-12",
+      "id_number": "348912345678"
+    },
+    "altered_field": null,
+    "defect": "none",
+    "details": "High sensor grain noise"
+  },
+  "hard_scanned_yellow_resume.jpg": {
+    "scenario": "job_application",
+    "doc_type": "resume",
+    "true_fields": {
+      "applicant_name": "Rohan Verma",
+      "email": "rohan.verma@example.com",
+      "phone": "+91 98765 43210",
+      "highest_qualification": "B.Tech Computer Science",
+      "institution": "Indian Institute of Technology",
+      "years_experience": "4"
+    },
+    "altered_field": null,
+    "defect": "none",
+    "details": "Scanned document with vintage yellow paper tint"
+  },
+  "hard_decorative_certificate.pdf": {
+    "scenario": "college",
+    "doc_type": "registration_letter",
+    "true_fields": {
+      "applicant_name": "Vikramaditya Rao"
+    },
+    "altered_field": null,
+    "defect": "none",
+    "details": "Decorative-font certificate"
+  }
+}

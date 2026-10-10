@@ -182,6 +182,7 @@ Show a summary table of emails, their documents, and expected route.
 
 ### M2 (Mac): parse layer (Reader A)
 
+
 ```
 Implement the parse layer (Reader A). Mac only. First read app/parse/base.py, app/parse/mock_reader.py
 and app/schemas.py (ParsedDocument, ParsedLine, BBox) and conform to them. Do not change them.

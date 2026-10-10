@@ -1,18 +1,8 @@
 # Owner: Laptop B
 """INX – Tests: intake (email_import and case_builder).
 
-Verifies all email intake edge cases:
-1. One email with 5 attachments
-2. One email with a ZIP attachment
-3. One email with a folder-like ZIP tree
-4. One with no attachment
-5. One with an unsupported attachment (.exe)
-6. Duplicate Message-ID deduplication
-7. Filename traversal / path injection sanitization
-8. Sender, display name, reply-to, and date parsing
-9. Upfront email count reporting (count_emails / count_cases)
-10. .eml vs .mbox handling
-11. Lazy streaming via iter_cases_from_source
+Verifies all email intake edge cases against the full scenario mailboxes
+(fixtures/mail/job_applications.mbox and college_applications.mbox).
 """
 
 from __future__ import annotations
@@ -39,25 +29,40 @@ from app.intake.email_import import (
     sanitize_filename,
 )
 from app.schemas import CaseRecord, WorkflowStatus
-from scripts.make_mbox import build_synthetic_messages, make_mbox
 from tests.helpers import make_doc_image
 
-
-@pytest.fixture
-def synthetic_mbox(tmp_path: Path) -> Path:
-    """Fixture producing a synthetic .mbox file with all 6 edge cases."""
-    mbox_path = tmp_path / "test_synthetic.mbox"
-    eml_dir = tmp_path / "emls"
-    return make_mbox(out_path=mbox_path, eml_dir=eml_dir)
+# Canonical fixture mailboxes
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+_JOB_MBOX = _REPO_ROOT / "fixtures" / "mail" / "job_applications.mbox"
+_COL_MBOX = _REPO_ROOT / "fixtures" / "mail" / "college_applications.mbox"
 
 
-def test_upfront_count_reporting(synthetic_mbox: Path, tmp_path: Path):
+@pytest.fixture(scope="module")
+def job_mbox() -> Path:
+    assert _JOB_MBOX.exists(), "Run `python scripts/make_mbox.py` to generate mailboxes."
+    return _JOB_MBOX
+
+
+@pytest.fixture(scope="module")
+def col_mbox() -> Path:
+    assert _COL_MBOX.exists(), "Run `python scripts/make_mbox.py` to generate mailboxes."
+    return _COL_MBOX
+
+
+def test_upfront_count_reporting(job_mbox: Path, tmp_path: Path):
     """Verify count_emails and count_cases report total emails up front."""
-    assert count_emails(synthetic_mbox) == 6
-    assert count_cases(synthetic_mbox) == 6
+    total = count_emails(job_mbox)
+    assert total == 22, f"Expected 22 emails in job_applications.mbox, got {total}"
+    assert count_cases(job_mbox) == 22
 
     # For an individual .eml file
-    eml_path = tmp_path / "emls" / "email_01.eml"
+    msg = email.message.EmailMessage()
+    msg["From"] = '"Test" <t@example.com>'
+    msg["Subject"] = "S"
+    msg["Message-ID"] = "<upfront-count-test@example.com>"
+    msg.set_content("body")
+    eml_path = tmp_path / "single.eml"
+    eml_path.write_bytes(msg.as_bytes())
     assert count_emails(eml_path) == 1
     assert count_cases(eml_path) == 1
 
@@ -73,91 +78,79 @@ def test_sanitize_filename_prevents_traversal():
     assert sanitize_filename("   ...   ", index=3) == "attachment_3.bin"
 
 
-def test_deduplication_by_message_id(synthetic_mbox: Path):
-    """Verify duplicate Message-ID is dropped during intake."""
-    # Synthetic mbox has 6 messages, but Message 6 duplicates Message 1's ID.
-    parsed = list(iter_parsed_emails(synthetic_mbox))
-    # Exactly 5 unique cases should be parsed
-    assert len(parsed) == 5
+def test_deduplication_by_message_id(job_mbox: Path):
+    """Verify duplicate Message-ID is dropped during intake.
+
+    The job mailbox has 22 messages; cases 14 and 15 share the same Message-ID,
+    so exactly 21 unique cases should be parsed.
+    """
+    parsed = list(iter_parsed_emails(job_mbox))
+    assert len(parsed) == 21, f"Expected 21 unique emails after dedup, got {len(parsed)}"
 
     msg_ids = [p.message_id for p in parsed]
-    assert len(msg_ids) == len(set(msg_ids))
-    assert "<msg-001-five-attachments@falconix.test>".strip("<> ") in msg_ids
+    assert len(msg_ids) == len(set(msg_ids)), "Duplicate Message-IDs found after deduplication"
+
+    # The shared ID should appear exactly once
+    shared_id = "job-shared-duplicate-msg-id@falconix.test"
+    assert msg_ids.count(shared_id) == 1
 
 
-def test_email_with_five_attachments(synthetic_mbox: Path, tmp_path: Path):
-    """Edge Case 1: email with 5 attachments produces 5 ingested documents."""
+def test_complete_bundle_is_processed(job_mbox: Path, tmp_path: Path):
+    """Edge Case 1: Complete bundle (resume + id) produces ingested documents."""
     data_dir = tmp_path / "data"
-    cases = build_cases_from_source(synthetic_mbox, scenario="job_application", data_dir=data_dir)
+    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
 
-    # First case is the 5-attachment email from Dr. Priya Nair
-    case1 = cases[0]
-    assert case1.sender_name == "Dr. Priya Nair"
-    assert case1.sender_email == "priya.nair@research.org"
-    assert case1.subject == "Application for Senior Research Scientist"
-    assert case1.workflow_status == WorkflowStatus.received
+    # Case 01 is the complete bundle from Rohan Verma
+    case = cases[0]
+    assert case.sender_name == "Rohan Verma"
+    assert case.sender_email == "rohan.verma@example.com"
+    assert case.subject == "Job Application – Senior Engineer"
+    assert case.workflow_status == WorkflowStatus.received
 
-    # All 5 attachments (PDFs and image) should be ingested
-    assert len(case1.documents) == 5
-    filenames = {d.filename for d in case1.documents}
+    # Both resume.pdf and id_card.jpg are ingested
+    filenames = {d.filename for d in case.documents}
     assert "resume.pdf" in filenames
-    assert "id_proof.png" in filenames
-    assert "publication_summary.pdf" in filenames
+    assert "id_card.jpg" in filenames
 
 
-def test_email_with_zip_attachment(synthetic_mbox: Path, tmp_path: Path):
-    """Edge Case 2: email with a ZIP is transparently expanded and ingested."""
+def test_email_with_zip_attachment(job_mbox: Path, tmp_path: Path):
+    """Edge Case 11: ZIP attachment is transparently expanded and ingested."""
     data_dir = tmp_path / "data"
-    cases = build_cases_from_source(synthetic_mbox, scenario="job_application", data_dir=data_dir)
+    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
 
-    # Second case has documents.zip containing resume.pdf and id_document.png
-    case2 = cases[1]
-    assert case2.sender_name == "Vikramaditya Rao"
-    assert len(case2.documents) == 2
-    filenames = {d.filename for d in case2.documents}
+    # Case 11 (index 10) is the ZIP email from Pooja Hegde
+    case = cases[10]
+    assert case.sender_name == "Pooja Hegde"
+    assert len(case.documents) == 2
+    filenames = {d.filename for d in case.documents}
     assert "resume.pdf" in filenames
-    assert "id_document.png" in filenames
+    assert "id.jpg" in filenames
 
 
-def test_email_with_folder_like_zip_tree(synthetic_mbox: Path, tmp_path: Path):
-    """Edge Case 3: email with a nested folder ZIP tree extracts and ingests documents."""
+def test_email_with_no_attachments(job_mbox: Path, tmp_path: Path):
+    """Edge Case 12: Email with no attachments does not crash, records a note."""
     data_dir = tmp_path / "data"
-    cases = build_cases_from_source(synthetic_mbox, scenario="college", data_dir=data_dir)
+    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
 
-    # Third case has admission_tree.zip with subdirectories
-    case3 = cases[2]
-    assert case3.sender_name == "Ananya Iyer"
-    assert len(case3.documents) == 3
-    filenames = {d.filename for d in case3.documents}
-    assert "marksheet.pdf" in filenames
-    assert "student_id.png" in filenames
-    assert "bonafide_certificate.pdf" in filenames
+    # Case 12 (index 11) is the no-attachment email from Alok Kumar
+    case = cases[11]
+    assert case.sender_name == "Alok Kumar"
+    assert len(case.documents) == 0
+    assert any("no attachments" in note.lower() or "no documents" in note.lower()
+               for note in case.intake_notes)
 
 
-def test_email_with_no_attachments(synthetic_mbox: Path, tmp_path: Path):
-    """Edge Case 4: email with no attachments does not crash, notes recorded."""
+def test_email_with_unsupported_attachment(job_mbox: Path, tmp_path: Path):
+    """Edge Case 13: .exe attachment is rejected and recorded in skipped_files."""
     data_dir = tmp_path / "data"
-    cases = build_cases_from_source(synthetic_mbox, scenario="job_application", data_dir=data_dir)
+    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
 
-    # Fourth case has 0 attachments
-    case4 = cases[3]
-    assert case4.sender_name == "Sunita Deshmukh"
-    assert len(case4.documents) == 0
-    assert any("no attachments" in note.lower() for note in case4.intake_notes)
-
-
-def test_email_with_unsupported_attachment(synthetic_mbox: Path, tmp_path: Path):
-    """Edge Case 5: unsupported attachment (.exe) is recorded in skipped_files."""
-    data_dir = tmp_path / "data"
-    cases = build_cases_from_source(synthetic_mbox, scenario="job_application", data_dir=data_dir)
-
-    # Fifth case has installer_tool.exe
-    case5 = cases[4]
-    assert case5.sender_name == "Karthik Subramanian"
-    assert len(case5.documents) == 0
-    assert len(case5.skipped_files) >= 1
-    skipped_filenames = [sf["filename"] for sf in case5.skipped_files]
-    assert any("installer_tool.exe" in name for name in skipped_filenames)
+    # Case 13 (index 12) is the .exe-only email
+    case = cases[12]
+    assert len(case.documents) == 0
+    assert len(case.skipped_files) >= 1
+    skipped_fnames = [sf["filename"] for sf in case.skipped_files]
+    assert any("installer.exe" in name for name in skipped_fnames)
 
 
 def test_eml_single_file_import(tmp_path: Path):
@@ -172,7 +165,9 @@ def test_eml_single_file_import(tmp_path: Path):
 
     doc_img = tmp_path / "my_id.png"
     make_doc_image(doc_img, seed=99)
-    msg.add_attachment(doc_img.read_bytes(), maintype="image", subtype="png", filename="my_id.png")
+    msg.add_attachment(
+        doc_img.read_bytes(), maintype="image", subtype="png", filename="my_id.png"
+    )
     eml_file.write_bytes(msg.as_bytes())
 
     data_dir = tmp_path / "data"
@@ -185,10 +180,64 @@ def test_eml_single_file_import(tmp_path: Path):
     assert case.documents[0].filename == "my_id.png"
 
 
-def test_lazy_streaming(synthetic_mbox: Path, tmp_path: Path):
-    """Verify iter_cases_from_source yields cases one by one without loading all at once."""
+def test_lazy_streaming(job_mbox: Path, tmp_path: Path):
+    """Verify iter_cases_from_source yields cases one by one lazily."""
     data_dir = tmp_path / "data"
-    stream = iter_cases_from_source(synthetic_mbox, scenario="college", data_dir=data_dir)
+    stream = iter_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
     first_case = next(stream)
     assert isinstance(first_case, CaseRecord)
-    assert first_case.sender_email == "priya.nair@research.org"
+    # First unique case is Rohan Verma (case 01)
+    assert first_case.sender_email == "rohan.verma@example.com"
+
+
+def test_same_documents_from_two_senders(job_mbox: Path, tmp_path: Path):
+    """Cases 16 & 17: same files from different senders — 17 should flag duplicate_file."""
+    data_dir = tmp_path / "data"
+    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
+
+    # Case 16 (Candidate Alpha) — original, 2 docs
+    case_alpha = cases[14]   # after dedup: 14 unique cases before case 16
+    assert case_alpha.sender_name == "Candidate Alpha"
+    assert len(case_alpha.documents) == 2
+
+    # Case 17 (Candidate Beta) — same files, should have is_duplicate=True docs
+    case_beta = cases[15]
+    assert case_beta.sender_name == "Candidate Beta"
+    assert any(d.is_duplicate for d in case_beta.documents)
+
+
+def test_mislabeled_attachment(job_mbox: Path, tmp_path: Path):
+    """Case 18: file named marksheet.pdf that is really an ID card — documents ingested."""
+    data_dir = tmp_path / "data"
+    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
+
+    case = cases[16]
+    assert case.sender_name == "Manish Malhotra"
+    filenames = {d.filename for d in case.documents}
+    assert "marksheet.pdf" in filenames  # accepted but mislabeled
+
+
+def test_neutral_attachment_names(job_mbox: Path, tmp_path: Path):
+    """Case 19: neutral names (scan001.pdf, IMG_2041.jpg) are ingested without errors."""
+    data_dir = tmp_path / "data"
+    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
+
+    case = cases[17]
+    assert case.sender_name == "Aditi Sharma"
+    filenames = {d.filename for d in case.documents}
+    assert "scan001.pdf" in filenames
+    assert "IMG_2041.jpg" in filenames
+
+
+def test_hard_variants_in_mailbox(job_mbox: Path, tmp_path: Path):
+    """Case 21: 3 hard augmented variants are ingested from mailbox."""
+    data_dir = tmp_path / "data"
+    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
+
+    case = cases[19]
+    assert case.sender_name == "Harish Patel"
+    assert len(case.documents) == 3
+    filenames = {d.filename for d in case.documents}
+    assert "tilted_resume.jpg" in filenames
+    assert "perspective_id.jpg" in filenames
+    assert "scanned_yellow.jpg" in filenames

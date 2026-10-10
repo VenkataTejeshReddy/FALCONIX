@@ -1,4 +1,833 @@
 {
+  "documents": {
+    "job_normal_resume.pdf": {
+      "scenario": "job_application",
+      "case_type": "normal",
+      "doc_type": "resume",
+      "expected_statuses": {
+        "applicant_name": "valid",
+        "email": "valid",
+        "highest_qualification": "valid",
+        "institution": "valid",
+        "years_experience": "valid"
+      },
+      "expected_route": "fast_track"
+    },
+    "job_normal_id.jpg": {
+      "scenario": "job_application",
+      "case_type": "normal",
+      "doc_type": "id_document",
+      "expected_statuses": {
+        "applicant_name": "valid",
+        "id_number": "valid",
+        "document_date": "valid"
+      },
+      "expected_route": "fast_track"
+    },
+    "job_missing_field_resume.pdf": {
+      "scenario": "job_application",
+      "case_type": "missing_field",
+      "doc_type": "resume",
+      "expected_statuses": {
+        "applicant_name": "valid",
+        "email": "missing",
+        "years_experience": "missing"
+      },
+      "expected_route": "needs_review"
+    },
+    "job_name_typo_id.jpg": {
+      "scenario": "job_application",
+      "case_type": "name_typo",
+      "doc_type": "id_document",
+      "expected_statuses": {
+        "applicant_name": "conflict",
+        "id_number": "valid"
+      },
+      "expected_route": "needs_review"
+    },
+    "job_conflicting_id.pdf": {
+      "scenario": "job_application",
+      "case_type": "conflicting_id",
+      "doc_type": "id_document",
+      "expected_statuses": {
+        "applicant_name": "valid",
+        "id_number": "conflict"
+      },
+      "expected_route": "needs_review"
+    },
+    "job_unclear_stamp_id.jpg": {
+      "scenario": "job_application",
+      "case_type": "unclear_stamp",
+      "doc_type": "id_document",
+      "expected_statuses": {
+        "id_number": "unclear"
+      },
+      "expected_route": "needs_review"
+    },
+    "job_unknown_menu.pdf": {
+      "scenario": "job_application",
+      "case_type": "unknown_document",
+      "doc_type": "unknown",
+      "expected_statuses": {},
+      "expected_route": "manual_review"
+    },
+    "job_multipage_differing_value.pdf": {
+      "scenario": "job_application",
+      "case_type": "multipage_differing_value",
+      "doc_type": "id_document",
+      "expected_statuses": {
+        "id_number": "conflict"
+      },
+      "expected_route": "needs_review"
+    },
+    "college_normal_marksheet.pdf": {
+      "scenario": "college",
+      "case_type": "normal",
+      "doc_type": "marksheet",
+      "expected_statuses": {
+        "applicant_name": "valid",
+        "marks_or_grade": "valid",
+        "institution": "valid",
+        "course": "valid",
+        "issue_date": "valid"
+      },
+      "expected_route": "fast_track"
+    },
+    "college_normal_id.jpg": {
+      "scenario": "college",
+      "case_type": "normal",
+      "doc_type": "id_document",
+      "expected_statuses": {
+        "applicant_name": "valid",
+        "date_of_birth": "valid",
+        "id_number": "valid"
+      },
+      "expected_route": "fast_track"
+    },
+    "college_missing_date_marksheet.pdf": {
+      "scenario": "college",
+      "case_type": "missing_field",
+      "doc_type": "marksheet",
+      "expected_statuses": {
+        "applicant_name": "valid",
+        "issue_date": "missing"
+      },
+      "expected_route": "needs_review"
+    },
+    "college_name_typo_id.jpg": {
+      "scenario": "college",
+      "case_type": "name_typo",
+      "doc_type": "id_document",
+      "expected_statuses": {
+        "applicant_name": "conflict",
+        "id_number": "valid"
+      },
+      "expected_route": "needs_review"
+    },
+    "college_future_dob_id.pdf": {
+      "scenario": "college",
+      "case_type": "conflicting_date",
+      "doc_type": "id_document",
+      "expected_statuses": {
+        "date_of_birth": "conflict"
+      },
+      "expected_route": "needs_review"
+    }
+  },
+  "emails": {
+    "job-01-complete@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "01-complete",
+      "subject": "Job Application \u2013 Senior Engineer",
+      "sender": "rohan.verma@example.com",
+      "sender_name": "Rohan Verma",
+      "message_id": "<job-01-complete@falconix.test>",
+      "documents": [
+        "resume.pdf",
+        "id_card.jpg"
+      ],
+      "expected_workflow_status": "verified",
+      "expected_route": "PROCESS",
+      "expected_issue_kinds": []
+    },
+    "job-02-missing-field@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "02-missing-field",
+      "subject": "Application \u2013 Sunita Deshmukh",
+      "sender": "sunita.d@example.com",
+      "sender_name": "Sunita Deshmukh",
+      "message_id": "<job-02-missing-field@falconix.test>",
+      "documents": [
+        "resume.pdf",
+        "id_card.jpg"
+      ],
+      "expected_workflow_status": "awaiting_information",
+      "expected_route": "REQUEST_INFO",
+      "expected_issue_kinds": [
+        "missing"
+      ]
+    },
+    "job-03-name-typo@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "03-name-typo",
+      "subject": "Application Discrepancy Case",
+      "sender": "rohan.v@example.com",
+      "sender_name": "Rohan Verma",
+      "message_id": "<job-03-name-typo@falconix.test>",
+      "documents": [
+        "resume.pdf",
+        "id_card.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "MANUAL_VERIFICATION",
+      "expected_issue_kinds": [
+        "conflict"
+      ]
+    },
+    "job-04-initials-typo@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "04-initials-typo",
+      "subject": "Application \u2013 Priya Sharma",
+      "sender": "priya.sharma@example.com",
+      "sender_name": "Priya Sharma",
+      "message_id": "<job-04-initials-typo@falconix.test>",
+      "documents": [
+        "resume.pdf",
+        "id_card.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "MANUAL_VERIFICATION",
+      "expected_issue_kinds": [
+        "conflict"
+      ]
+    },
+    "job-05-invalid-id@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "05-invalid-id",
+      "subject": "Application with Corrupt ID Checksum",
+      "sender": "karthik.sub@example.com",
+      "sender_name": "Karthik Subramanian",
+      "message_id": "<job-05-invalid-id@falconix.test>",
+      "documents": [
+        "resume.pdf",
+        "id_card.pdf"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "unreliable"
+      ]
+    },
+    "job-06-obscured-stamp@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "06-obscured-stamp",
+      "subject": "Application \u2013 Stamped ID",
+      "sender": "v.rao@example.com",
+      "sender_name": "Vikramaditya Rao",
+      "message_id": "<job-06-obscured-stamp@falconix.test>",
+      "documents": [
+        "resume.pdf",
+        "id_card.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "unclear"
+      ]
+    },
+    "job-07-blurry-photo@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "07-blurry-photo",
+      "subject": "Application \u2013 Camera Capture",
+      "sender": "aarav.m@example.com",
+      "sender_name": "Aarav Mehta",
+      "message_id": "<job-07-blurry-photo@falconix.test>",
+      "documents": [
+        "resume.jpg",
+        "id_card.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "poor_quality"
+      ]
+    },
+    "job-08-unknown-menu@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "08-unknown-menu",
+      "subject": "Application and Attachments",
+      "sender": "neha.g@example.com",
+      "sender_name": "Neha Gupta",
+      "message_id": "<job-08-unknown-menu@falconix.test>",
+      "documents": [
+        "menu.pdf",
+        "id_card.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "unknown_type"
+      ]
+    },
+    "job-09-missing-doc@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "09-missing-doc",
+      "subject": "Application without Government ID",
+      "sender": "deepak.j@example.com",
+      "sender_name": "Deepak Joshi",
+      "message_id": "<job-09-missing-doc@falconix.test>",
+      "documents": [
+        "resume.pdf"
+      ],
+      "expected_workflow_status": "awaiting_information",
+      "expected_route": "REQUEST_INFO",
+      "expected_issue_kinds": [
+        "missing_document"
+      ]
+    },
+    "job-10-unexpected-doc@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "10-unexpected-doc",
+      "subject": "Application with College Marksheet",
+      "sender": "siddharth.s@example.com",
+      "sender_name": "Siddharth Sen",
+      "message_id": "<job-10-unexpected-doc@falconix.test>",
+      "documents": [
+        "resume.pdf",
+        "id_card.jpg",
+        "marksheet.pdf"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "unknown_type"
+      ]
+    },
+    "job-11-zip-bundle@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "11-zip-bundle",
+      "subject": "Application in Zip Archive",
+      "sender": "pooja.h@example.com",
+      "sender_name": "Pooja Hegde",
+      "message_id": "<job-11-zip-bundle@falconix.test>",
+      "documents": [
+        "documents.zip"
+      ],
+      "expected_workflow_status": "verified",
+      "expected_route": "PROCESS",
+      "expected_issue_kinds": []
+    },
+    "job-12-no-attachment@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "12-no-attachment",
+      "subject": "Inquiry: Application Submission",
+      "sender": "alok.k@example.com",
+      "sender_name": "Alok Kumar",
+      "message_id": "<job-12-no-attachment@falconix.test>",
+      "documents": [],
+      "expected_workflow_status": "awaiting_information",
+      "expected_route": "REQUEST_INFO",
+      "expected_issue_kinds": [
+        "missing_document"
+      ]
+    },
+    "job-13-only-exe@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "13-only-exe",
+      "subject": "Diagnostics Tool Payload",
+      "sender": "auditor@example.com",
+      "sender_name": "Security Auditor",
+      "message_id": "<job-13-only-exe@falconix.test>",
+      "documents": [
+        "installer.exe"
+      ],
+      "expected_workflow_status": "awaiting_information",
+      "expected_route": "REQUEST_INFO",
+      "expected_issue_kinds": [
+        "unsupported_file",
+        "missing_document"
+      ]
+    },
+    "job-shared-duplicate-msg-id@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "15-dup-id-second",
+      "subject": "Re: Application Resubmission Test",
+      "sender": "priya.nair@example.com",
+      "sender_name": "Dr. Priya Nair (Second)",
+      "message_id": "<job-shared-duplicate-msg-id@falconix.test>",
+      "documents": [
+        "resume.pdf"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "duplicate_file"
+      ]
+    },
+    "job-16-same-docs-sender-a@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "16-same-docs-sender-a",
+      "subject": "Candidate Alpha Application",
+      "sender": "candidate.a@example.com",
+      "sender_name": "Candidate Alpha",
+      "message_id": "<job-16-same-docs-sender-a@falconix.test>",
+      "documents": [
+        "resume.pdf",
+        "id_card.jpg"
+      ],
+      "expected_workflow_status": "verified",
+      "expected_route": "PROCESS",
+      "expected_issue_kinds": []
+    },
+    "job-17-same-docs-sender-b@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "17-same-docs-sender-b",
+      "subject": "Candidate Beta Application",
+      "sender": "candidate.b@example.com",
+      "sender_name": "Candidate Beta",
+      "message_id": "<job-17-same-docs-sender-b@falconix.test>",
+      "documents": [
+        "resume.pdf",
+        "id_card.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "duplicate_file"
+      ]
+    },
+    "job-18-mislabeled-doc@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "18-mislabeled-doc",
+      "subject": "Application with Mislabeled Document",
+      "sender": "manish.m@example.com",
+      "sender_name": "Manish Malhotra",
+      "message_id": "<job-18-mislabeled-doc@falconix.test>",
+      "documents": [
+        "resume.pdf",
+        "marksheet.pdf"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "unclear"
+      ]
+    },
+    "job-19-neutral-names@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "19-neutral-names",
+      "subject": "Documents Attached",
+      "sender": "aditi.s@example.com",
+      "sender_name": "Aditi Sharma",
+      "message_id": "<job-19-neutral-names@falconix.test>",
+      "documents": [
+        "scan001.pdf",
+        "IMG_2041.jpg"
+      ],
+      "expected_workflow_status": "verified",
+      "expected_route": "PROCESS",
+      "expected_issue_kinds": []
+    },
+    "job-20-prompt-injection@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "20-prompt-injection",
+      "subject": "Security Evaluation Application",
+      "sender": "redteam@example.com",
+      "sender_name": "Red Team Tester",
+      "message_id": "<job-20-prompt-injection@falconix.test>",
+      "documents": [
+        "profile.pdf",
+        "id_card.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "unreliable"
+      ]
+    },
+    "job-21-hard-variants@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "21-hard-variants",
+      "subject": "Application with Challenging Mobile Scans",
+      "sender": "harish.p@example.com",
+      "sender_name": "Harish Patel",
+      "message_id": "<job-21-hard-variants@falconix.test>",
+      "documents": [
+        "tilted_resume.jpg",
+        "perspective_id.jpg",
+        "scanned_yellow.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "poor_quality",
+        "unreliable"
+      ]
+    },
+    "job-22-six-page-retrieval@falconix.test": {
+      "mailbox": "job_applications.mbox",
+      "case_id": "22-six-page-retrieval",
+      "subject": "Application Dossier 6-Pages",
+      "sender": "rajesh.k@example.com",
+      "sender_name": "Rajesh Kumar",
+      "message_id": "<job-22-six-page-retrieval@falconix.test>",
+      "documents": [
+        "dossier.pdf",
+        "resume.pdf"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "MANUAL_VERIFICATION",
+      "expected_issue_kinds": [
+        "conflict"
+      ]
+    },
+    "col-01-complete@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "01-complete",
+      "subject": "College Admission Submission",
+      "sender": "ananya.iyer@example.com",
+      "sender_name": "Ananya Iyer",
+      "message_id": "<col-01-complete@falconix.test>",
+      "documents": [
+        "marksheet.pdf",
+        "student_id.jpg"
+      ],
+      "expected_workflow_status": "verified",
+      "expected_route": "PROCESS",
+      "expected_issue_kinds": []
+    },
+    "col-02-missing-field@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "02-missing-field",
+      "subject": "Marksheet Submission without Issue Date",
+      "sender": "rupa.r@example.com",
+      "sender_name": "Rupa Roy",
+      "message_id": "<col-02-missing-field@falconix.test>",
+      "documents": [
+        "marksheet.pdf",
+        "student_id.jpg"
+      ],
+      "expected_workflow_status": "awaiting_information",
+      "expected_route": "REQUEST_INFO",
+      "expected_issue_kinds": [
+        "missing"
+      ]
+    },
+    "col-03-name-typo@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "03-name-typo",
+      "subject": "Admission Application Typo Case",
+      "sender": "ananya.iyer@example.com",
+      "sender_name": "Ananya Iyer",
+      "message_id": "<col-03-name-typo@falconix.test>",
+      "documents": [
+        "marksheet.pdf",
+        "student_id.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "MANUAL_VERIFICATION",
+      "expected_issue_kinds": [
+        "conflict"
+      ]
+    },
+    "col-04-initials-typo@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "04-initials-typo",
+      "subject": "College Application \u2013 Priya Sharma",
+      "sender": "priya.s@example.com",
+      "sender_name": "Priya Sharma",
+      "message_id": "<col-04-initials-typo@falconix.test>",
+      "documents": [
+        "marksheet.pdf",
+        "student_id.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "MANUAL_VERIFICATION",
+      "expected_issue_kinds": [
+        "conflict"
+      ]
+    },
+    "col-05-invalid-dob@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "05-invalid-dob",
+      "subject": "Admission with Future Date of Birth",
+      "sender": "kavita.r@example.com",
+      "sender_name": "Kavita Rao",
+      "message_id": "<col-05-invalid-dob@falconix.test>",
+      "documents": [
+        "marksheet.pdf",
+        "student_id.pdf"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "unreliable"
+      ]
+    },
+    "col-06-obscured-stamp@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "06-obscured-stamp",
+      "subject": "Submission with Stamped Grade Sheet",
+      "sender": "divya.m@example.com",
+      "sender_name": "Divya Menon",
+      "message_id": "<col-06-obscured-stamp@falconix.test>",
+      "documents": [
+        "marksheet.jpg",
+        "student_id.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "unclear"
+      ]
+    },
+    "col-07-blurry-photo@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "07-blurry-photo",
+      "subject": "Marksheet Smartphone Photo",
+      "sender": "sanjay.s@example.com",
+      "sender_name": "Sanjay Singhania",
+      "message_id": "<col-07-blurry-photo@falconix.test>",
+      "documents": [
+        "marksheet.jpg",
+        "student_id.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "poor_quality"
+      ]
+    },
+    "col-08-unknown-menu@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "08-unknown-menu",
+      "subject": "College Admission Documents",
+      "sender": "madhav.v@example.com",
+      "sender_name": "Madhav Varma",
+      "message_id": "<col-08-unknown-menu@falconix.test>",
+      "documents": [
+        "menu.pdf",
+        "student_id.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "unknown_type"
+      ]
+    },
+    "col-09-missing-doc@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "09-missing-doc",
+      "subject": "Marksheet Submission Only",
+      "sender": "shreya.g@example.com",
+      "sender_name": "Shreya Ghoshal",
+      "message_id": "<col-09-missing-doc@falconix.test>",
+      "documents": [
+        "marksheet.pdf"
+      ],
+      "expected_workflow_status": "awaiting_information",
+      "expected_route": "REQUEST_INFO",
+      "expected_issue_kinds": [
+        "missing_document"
+      ]
+    },
+    "col-10-unexpected-doc@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "10-unexpected-doc",
+      "subject": "Submission with Employment Offer Letter",
+      "sender": "nikhil.c@example.com",
+      "sender_name": "Nikhil Chopra",
+      "message_id": "<col-10-unexpected-doc@falconix.test>",
+      "documents": [
+        "marksheet.pdf",
+        "student_id.jpg",
+        "offer.pdf"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "unknown_type"
+      ]
+    },
+    "col-11-zip-bundle@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "11-zip-bundle",
+      "subject": "Academic Records in Archive",
+      "sender": "pooja.h@example.com",
+      "sender_name": "Pooja Hegde",
+      "message_id": "<col-11-zip-bundle@falconix.test>",
+      "documents": [
+        "college_bundle.zip"
+      ],
+      "expected_workflow_status": "verified",
+      "expected_route": "PROCESS",
+      "expected_issue_kinds": []
+    },
+    "col-12-no-attachment@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "12-no-attachment",
+      "subject": "Inquiry on College Admissions",
+      "sender": "gaurav.r@example.com",
+      "sender_name": "Gaurav Roy",
+      "message_id": "<col-12-no-attachment@falconix.test>",
+      "documents": [],
+      "expected_workflow_status": "awaiting_information",
+      "expected_route": "REQUEST_INFO",
+      "expected_issue_kinds": [
+        "missing_document"
+      ]
+    },
+    "col-13-only-exe@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "13-only-exe",
+      "subject": "System Utility Attachment",
+      "sender": "security@example.com",
+      "sender_name": "Campus Security",
+      "message_id": "<col-13-only-exe@falconix.test>",
+      "documents": [
+        "installer.exe"
+      ],
+      "expected_workflow_status": "awaiting_information",
+      "expected_route": "REQUEST_INFO",
+      "expected_issue_kinds": [
+        "unsupported_file",
+        "missing_document"
+      ]
+    },
+    "col-shared-duplicate-msg-id@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "15-dup-id-second",
+      "subject": "Re: Endorsement for Admission",
+      "sender": "swami@example.com",
+      "sender_name": "Dr. Swaminathan (Copy)",
+      "message_id": "<col-shared-duplicate-msg-id@falconix.test>",
+      "documents": [
+        "marksheet.pdf"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "duplicate_file"
+      ]
+    },
+    "col-16-same-docs-sender-a@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "16-same-docs-sender-a",
+      "subject": "Student Alpha Records",
+      "sender": "student.a@example.com",
+      "sender_name": "Student Alpha",
+      "message_id": "<col-16-same-docs-sender-a@falconix.test>",
+      "documents": [
+        "marksheet.pdf",
+        "student_id.jpg"
+      ],
+      "expected_workflow_status": "verified",
+      "expected_route": "PROCESS",
+      "expected_issue_kinds": []
+    },
+    "col-17-same-docs-sender-b@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "17-same-docs-sender-b",
+      "subject": "Student Beta Records",
+      "sender": "student.b@example.com",
+      "sender_name": "Student Beta",
+      "message_id": "<col-17-same-docs-sender-b@falconix.test>",
+      "documents": [
+        "marksheet.pdf",
+        "student_id.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "duplicate_file"
+      ]
+    },
+    "col-18-mislabeled-doc@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "18-mislabeled-doc",
+      "subject": "Admission with Mislabeled Document",
+      "sender": "tanya.s@example.com",
+      "sender_name": "Tanya Sen",
+      "message_id": "<col-18-mislabeled-doc@falconix.test>",
+      "documents": [
+        "marksheet.pdf",
+        "student_id.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "unclear"
+      ]
+    },
+    "col-19-neutral-names@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "19-neutral-names",
+      "subject": "College Submission \u2013 Scans",
+      "sender": "preeti.d@example.com",
+      "sender_name": "Preeti Das",
+      "message_id": "<col-19-neutral-names@falconix.test>",
+      "documents": [
+        "scan001.pdf",
+        "IMG_2041.jpg"
+      ],
+      "expected_workflow_status": "verified",
+      "expected_route": "PROCESS",
+      "expected_issue_kinds": []
+    },
+    "col-20-prompt-injection@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "20-prompt-injection",
+      "subject": "Transcript Verification Application",
+      "sender": "adversary@example.com",
+      "sender_name": "Adversarial Student",
+      "message_id": "<col-20-prompt-injection@falconix.test>",
+      "documents": [
+        "transcript.pdf",
+        "student_id.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "unreliable"
+      ]
+    },
+    "col-21-hard-variants@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "21-hard-variants",
+      "subject": "Challenging Scans and Certificate",
+      "sender": "ravi.s@example.com",
+      "sender_name": "Ravi Shankar",
+      "message_id": "<col-21-hard-variants@falconix.test>",
+      "documents": [
+        "shadowed_marksheet.jpg",
+        "grainy_id.jpg",
+        "decorative_certificate.pdf"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "HUMAN_REVIEW",
+      "expected_issue_kinds": [
+        "poor_quality",
+        "unreliable"
+      ]
+    },
+    "col-22-six-page-retrieval@falconix.test": {
+      "mailbox": "college_applications.mbox",
+      "case_id": "22-six-page-retrieval",
+      "subject": "6-Page Academic Transcript",
+      "sender": "mohan.l@example.com",
+      "sender_name": "Mohan Lal",
+      "message_id": "<col-22-six-page-retrieval@falconix.test>",
+      "documents": [
+        "transcript_6page.pdf",
+        "student_id.jpg"
+      ],
+      "expected_workflow_status": "review_required",
+      "expected_route": "MANUAL_VERIFICATION",
+      "expected_issue_kinds": [
+        "conflict"
+      ]
+    }
+  },
   "job_normal_resume.pdf": {
     "scenario": "job_application",
     "case_type": "normal",
@@ -61,13 +890,6 @@
     "expected_statuses": {
       "id_number": "unclear"
     },
-    "expected_route": "needs_review"
-  },
-  "job_blurry_photo_resume.jpg": {
-    "scenario": "job_application",
-    "case_type": "blurry_photo",
-    "doc_type": "resume",
-    "expected_quality": "poor",
     "expected_route": "needs_review"
   },
   "job_unknown_menu.pdf": {
@@ -138,5 +960,697 @@
       "date_of_birth": "conflict"
     },
     "expected_route": "needs_review"
+  },
+  "job-01-complete@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "01-complete",
+    "subject": "Job Application \u2013 Senior Engineer",
+    "sender": "rohan.verma@example.com",
+    "sender_name": "Rohan Verma",
+    "message_id": "<job-01-complete@falconix.test>",
+    "documents": [
+      "resume.pdf",
+      "id_card.jpg"
+    ],
+    "expected_workflow_status": "verified",
+    "expected_route": "PROCESS",
+    "expected_issue_kinds": []
+  },
+  "job-02-missing-field@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "02-missing-field",
+    "subject": "Application \u2013 Sunita Deshmukh",
+    "sender": "sunita.d@example.com",
+    "sender_name": "Sunita Deshmukh",
+    "message_id": "<job-02-missing-field@falconix.test>",
+    "documents": [
+      "resume.pdf",
+      "id_card.jpg"
+    ],
+    "expected_workflow_status": "awaiting_information",
+    "expected_route": "REQUEST_INFO",
+    "expected_issue_kinds": [
+      "missing"
+    ]
+  },
+  "job-03-name-typo@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "03-name-typo",
+    "subject": "Application Discrepancy Case",
+    "sender": "rohan.v@example.com",
+    "sender_name": "Rohan Verma",
+    "message_id": "<job-03-name-typo@falconix.test>",
+    "documents": [
+      "resume.pdf",
+      "id_card.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "MANUAL_VERIFICATION",
+    "expected_issue_kinds": [
+      "conflict"
+    ]
+  },
+  "job-04-initials-typo@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "04-initials-typo",
+    "subject": "Application \u2013 Priya Sharma",
+    "sender": "priya.sharma@example.com",
+    "sender_name": "Priya Sharma",
+    "message_id": "<job-04-initials-typo@falconix.test>",
+    "documents": [
+      "resume.pdf",
+      "id_card.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "MANUAL_VERIFICATION",
+    "expected_issue_kinds": [
+      "conflict"
+    ]
+  },
+  "job-05-invalid-id@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "05-invalid-id",
+    "subject": "Application with Corrupt ID Checksum",
+    "sender": "karthik.sub@example.com",
+    "sender_name": "Karthik Subramanian",
+    "message_id": "<job-05-invalid-id@falconix.test>",
+    "documents": [
+      "resume.pdf",
+      "id_card.pdf"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "unreliable"
+    ]
+  },
+  "job-06-obscured-stamp@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "06-obscured-stamp",
+    "subject": "Application \u2013 Stamped ID",
+    "sender": "v.rao@example.com",
+    "sender_name": "Vikramaditya Rao",
+    "message_id": "<job-06-obscured-stamp@falconix.test>",
+    "documents": [
+      "resume.pdf",
+      "id_card.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "unclear"
+    ]
+  },
+  "job-07-blurry-photo@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "07-blurry-photo",
+    "subject": "Application \u2013 Camera Capture",
+    "sender": "aarav.m@example.com",
+    "sender_name": "Aarav Mehta",
+    "message_id": "<job-07-blurry-photo@falconix.test>",
+    "documents": [
+      "resume.jpg",
+      "id_card.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "poor_quality"
+    ]
+  },
+  "job-08-unknown-menu@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "08-unknown-menu",
+    "subject": "Application and Attachments",
+    "sender": "neha.g@example.com",
+    "sender_name": "Neha Gupta",
+    "message_id": "<job-08-unknown-menu@falconix.test>",
+    "documents": [
+      "menu.pdf",
+      "id_card.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "unknown_type"
+    ]
+  },
+  "job-09-missing-doc@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "09-missing-doc",
+    "subject": "Application without Government ID",
+    "sender": "deepak.j@example.com",
+    "sender_name": "Deepak Joshi",
+    "message_id": "<job-09-missing-doc@falconix.test>",
+    "documents": [
+      "resume.pdf"
+    ],
+    "expected_workflow_status": "awaiting_information",
+    "expected_route": "REQUEST_INFO",
+    "expected_issue_kinds": [
+      "missing_document"
+    ]
+  },
+  "job-10-unexpected-doc@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "10-unexpected-doc",
+    "subject": "Application with College Marksheet",
+    "sender": "siddharth.s@example.com",
+    "sender_name": "Siddharth Sen",
+    "message_id": "<job-10-unexpected-doc@falconix.test>",
+    "documents": [
+      "resume.pdf",
+      "id_card.jpg",
+      "marksheet.pdf"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "unknown_type"
+    ]
+  },
+  "job-11-zip-bundle@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "11-zip-bundle",
+    "subject": "Application in Zip Archive",
+    "sender": "pooja.h@example.com",
+    "sender_name": "Pooja Hegde",
+    "message_id": "<job-11-zip-bundle@falconix.test>",
+    "documents": [
+      "documents.zip"
+    ],
+    "expected_workflow_status": "verified",
+    "expected_route": "PROCESS",
+    "expected_issue_kinds": []
+  },
+  "job-12-no-attachment@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "12-no-attachment",
+    "subject": "Inquiry: Application Submission",
+    "sender": "alok.k@example.com",
+    "sender_name": "Alok Kumar",
+    "message_id": "<job-12-no-attachment@falconix.test>",
+    "documents": [],
+    "expected_workflow_status": "awaiting_information",
+    "expected_route": "REQUEST_INFO",
+    "expected_issue_kinds": [
+      "missing_document"
+    ]
+  },
+  "job-13-only-exe@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "13-only-exe",
+    "subject": "Diagnostics Tool Payload",
+    "sender": "auditor@example.com",
+    "sender_name": "Security Auditor",
+    "message_id": "<job-13-only-exe@falconix.test>",
+    "documents": [
+      "installer.exe"
+    ],
+    "expected_workflow_status": "awaiting_information",
+    "expected_route": "REQUEST_INFO",
+    "expected_issue_kinds": [
+      "unsupported_file",
+      "missing_document"
+    ]
+  },
+  "job-shared-duplicate-msg-id@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "15-dup-id-second",
+    "subject": "Re: Application Resubmission Test",
+    "sender": "priya.nair@example.com",
+    "sender_name": "Dr. Priya Nair (Second)",
+    "message_id": "<job-shared-duplicate-msg-id@falconix.test>",
+    "documents": [
+      "resume.pdf"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "duplicate_file"
+    ]
+  },
+  "job-16-same-docs-sender-a@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "16-same-docs-sender-a",
+    "subject": "Candidate Alpha Application",
+    "sender": "candidate.a@example.com",
+    "sender_name": "Candidate Alpha",
+    "message_id": "<job-16-same-docs-sender-a@falconix.test>",
+    "documents": [
+      "resume.pdf",
+      "id_card.jpg"
+    ],
+    "expected_workflow_status": "verified",
+    "expected_route": "PROCESS",
+    "expected_issue_kinds": []
+  },
+  "job-17-same-docs-sender-b@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "17-same-docs-sender-b",
+    "subject": "Candidate Beta Application",
+    "sender": "candidate.b@example.com",
+    "sender_name": "Candidate Beta",
+    "message_id": "<job-17-same-docs-sender-b@falconix.test>",
+    "documents": [
+      "resume.pdf",
+      "id_card.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "duplicate_file"
+    ]
+  },
+  "job-18-mislabeled-doc@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "18-mislabeled-doc",
+    "subject": "Application with Mislabeled Document",
+    "sender": "manish.m@example.com",
+    "sender_name": "Manish Malhotra",
+    "message_id": "<job-18-mislabeled-doc@falconix.test>",
+    "documents": [
+      "resume.pdf",
+      "marksheet.pdf"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "unclear"
+    ]
+  },
+  "job-19-neutral-names@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "19-neutral-names",
+    "subject": "Documents Attached",
+    "sender": "aditi.s@example.com",
+    "sender_name": "Aditi Sharma",
+    "message_id": "<job-19-neutral-names@falconix.test>",
+    "documents": [
+      "scan001.pdf",
+      "IMG_2041.jpg"
+    ],
+    "expected_workflow_status": "verified",
+    "expected_route": "PROCESS",
+    "expected_issue_kinds": []
+  },
+  "job-20-prompt-injection@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "20-prompt-injection",
+    "subject": "Security Evaluation Application",
+    "sender": "redteam@example.com",
+    "sender_name": "Red Team Tester",
+    "message_id": "<job-20-prompt-injection@falconix.test>",
+    "documents": [
+      "profile.pdf",
+      "id_card.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "unreliable"
+    ]
+  },
+  "job-21-hard-variants@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "21-hard-variants",
+    "subject": "Application with Challenging Mobile Scans",
+    "sender": "harish.p@example.com",
+    "sender_name": "Harish Patel",
+    "message_id": "<job-21-hard-variants@falconix.test>",
+    "documents": [
+      "tilted_resume.jpg",
+      "perspective_id.jpg",
+      "scanned_yellow.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "poor_quality",
+      "unreliable"
+    ]
+  },
+  "job-22-six-page-retrieval@falconix.test": {
+    "mailbox": "job_applications.mbox",
+    "case_id": "22-six-page-retrieval",
+    "subject": "Application Dossier 6-Pages",
+    "sender": "rajesh.k@example.com",
+    "sender_name": "Rajesh Kumar",
+    "message_id": "<job-22-six-page-retrieval@falconix.test>",
+    "documents": [
+      "dossier.pdf",
+      "resume.pdf"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "MANUAL_VERIFICATION",
+    "expected_issue_kinds": [
+      "conflict"
+    ]
+  },
+  "col-01-complete@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "01-complete",
+    "subject": "College Admission Submission",
+    "sender": "ananya.iyer@example.com",
+    "sender_name": "Ananya Iyer",
+    "message_id": "<col-01-complete@falconix.test>",
+    "documents": [
+      "marksheet.pdf",
+      "student_id.jpg"
+    ],
+    "expected_workflow_status": "verified",
+    "expected_route": "PROCESS",
+    "expected_issue_kinds": []
+  },
+  "col-02-missing-field@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "02-missing-field",
+    "subject": "Marksheet Submission without Issue Date",
+    "sender": "rupa.r@example.com",
+    "sender_name": "Rupa Roy",
+    "message_id": "<col-02-missing-field@falconix.test>",
+    "documents": [
+      "marksheet.pdf",
+      "student_id.jpg"
+    ],
+    "expected_workflow_status": "awaiting_information",
+    "expected_route": "REQUEST_INFO",
+    "expected_issue_kinds": [
+      "missing"
+    ]
+  },
+  "col-03-name-typo@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "03-name-typo",
+    "subject": "Admission Application Typo Case",
+    "sender": "ananya.iyer@example.com",
+    "sender_name": "Ananya Iyer",
+    "message_id": "<col-03-name-typo@falconix.test>",
+    "documents": [
+      "marksheet.pdf",
+      "student_id.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "MANUAL_VERIFICATION",
+    "expected_issue_kinds": [
+      "conflict"
+    ]
+  },
+  "col-04-initials-typo@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "04-initials-typo",
+    "subject": "College Application \u2013 Priya Sharma",
+    "sender": "priya.s@example.com",
+    "sender_name": "Priya Sharma",
+    "message_id": "<col-04-initials-typo@falconix.test>",
+    "documents": [
+      "marksheet.pdf",
+      "student_id.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "MANUAL_VERIFICATION",
+    "expected_issue_kinds": [
+      "conflict"
+    ]
+  },
+  "col-05-invalid-dob@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "05-invalid-dob",
+    "subject": "Admission with Future Date of Birth",
+    "sender": "kavita.r@example.com",
+    "sender_name": "Kavita Rao",
+    "message_id": "<col-05-invalid-dob@falconix.test>",
+    "documents": [
+      "marksheet.pdf",
+      "student_id.pdf"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "unreliable"
+    ]
+  },
+  "col-06-obscured-stamp@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "06-obscured-stamp",
+    "subject": "Submission with Stamped Grade Sheet",
+    "sender": "divya.m@example.com",
+    "sender_name": "Divya Menon",
+    "message_id": "<col-06-obscured-stamp@falconix.test>",
+    "documents": [
+      "marksheet.jpg",
+      "student_id.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "unclear"
+    ]
+  },
+  "col-07-blurry-photo@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "07-blurry-photo",
+    "subject": "Marksheet Smartphone Photo",
+    "sender": "sanjay.s@example.com",
+    "sender_name": "Sanjay Singhania",
+    "message_id": "<col-07-blurry-photo@falconix.test>",
+    "documents": [
+      "marksheet.jpg",
+      "student_id.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "poor_quality"
+    ]
+  },
+  "col-08-unknown-menu@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "08-unknown-menu",
+    "subject": "College Admission Documents",
+    "sender": "madhav.v@example.com",
+    "sender_name": "Madhav Varma",
+    "message_id": "<col-08-unknown-menu@falconix.test>",
+    "documents": [
+      "menu.pdf",
+      "student_id.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "unknown_type"
+    ]
+  },
+  "col-09-missing-doc@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "09-missing-doc",
+    "subject": "Marksheet Submission Only",
+    "sender": "shreya.g@example.com",
+    "sender_name": "Shreya Ghoshal",
+    "message_id": "<col-09-missing-doc@falconix.test>",
+    "documents": [
+      "marksheet.pdf"
+    ],
+    "expected_workflow_status": "awaiting_information",
+    "expected_route": "REQUEST_INFO",
+    "expected_issue_kinds": [
+      "missing_document"
+    ]
+  },
+  "col-10-unexpected-doc@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "10-unexpected-doc",
+    "subject": "Submission with Employment Offer Letter",
+    "sender": "nikhil.c@example.com",
+    "sender_name": "Nikhil Chopra",
+    "message_id": "<col-10-unexpected-doc@falconix.test>",
+    "documents": [
+      "marksheet.pdf",
+      "student_id.jpg",
+      "offer.pdf"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "unknown_type"
+    ]
+  },
+  "col-11-zip-bundle@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "11-zip-bundle",
+    "subject": "Academic Records in Archive",
+    "sender": "pooja.h@example.com",
+    "sender_name": "Pooja Hegde",
+    "message_id": "<col-11-zip-bundle@falconix.test>",
+    "documents": [
+      "college_bundle.zip"
+    ],
+    "expected_workflow_status": "verified",
+    "expected_route": "PROCESS",
+    "expected_issue_kinds": []
+  },
+  "col-12-no-attachment@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "12-no-attachment",
+    "subject": "Inquiry on College Admissions",
+    "sender": "gaurav.r@example.com",
+    "sender_name": "Gaurav Roy",
+    "message_id": "<col-12-no-attachment@falconix.test>",
+    "documents": [],
+    "expected_workflow_status": "awaiting_information",
+    "expected_route": "REQUEST_INFO",
+    "expected_issue_kinds": [
+      "missing_document"
+    ]
+  },
+  "col-13-only-exe@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "13-only-exe",
+    "subject": "System Utility Attachment",
+    "sender": "security@example.com",
+    "sender_name": "Campus Security",
+    "message_id": "<col-13-only-exe@falconix.test>",
+    "documents": [
+      "installer.exe"
+    ],
+    "expected_workflow_status": "awaiting_information",
+    "expected_route": "REQUEST_INFO",
+    "expected_issue_kinds": [
+      "unsupported_file",
+      "missing_document"
+    ]
+  },
+  "col-shared-duplicate-msg-id@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "15-dup-id-second",
+    "subject": "Re: Endorsement for Admission",
+    "sender": "swami@example.com",
+    "sender_name": "Dr. Swaminathan (Copy)",
+    "message_id": "<col-shared-duplicate-msg-id@falconix.test>",
+    "documents": [
+      "marksheet.pdf"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "duplicate_file"
+    ]
+  },
+  "col-16-same-docs-sender-a@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "16-same-docs-sender-a",
+    "subject": "Student Alpha Records",
+    "sender": "student.a@example.com",
+    "sender_name": "Student Alpha",
+    "message_id": "<col-16-same-docs-sender-a@falconix.test>",
+    "documents": [
+      "marksheet.pdf",
+      "student_id.jpg"
+    ],
+    "expected_workflow_status": "verified",
+    "expected_route": "PROCESS",
+    "expected_issue_kinds": []
+  },
+  "col-17-same-docs-sender-b@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "17-same-docs-sender-b",
+    "subject": "Student Beta Records",
+    "sender": "student.b@example.com",
+    "sender_name": "Student Beta",
+    "message_id": "<col-17-same-docs-sender-b@falconix.test>",
+    "documents": [
+      "marksheet.pdf",
+      "student_id.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "duplicate_file"
+    ]
+  },
+  "col-18-mislabeled-doc@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "18-mislabeled-doc",
+    "subject": "Admission with Mislabeled Document",
+    "sender": "tanya.s@example.com",
+    "sender_name": "Tanya Sen",
+    "message_id": "<col-18-mislabeled-doc@falconix.test>",
+    "documents": [
+      "marksheet.pdf",
+      "student_id.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "unclear"
+    ]
+  },
+  "col-19-neutral-names@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "19-neutral-names",
+    "subject": "College Submission \u2013 Scans",
+    "sender": "preeti.d@example.com",
+    "sender_name": "Preeti Das",
+    "message_id": "<col-19-neutral-names@falconix.test>",
+    "documents": [
+      "scan001.pdf",
+      "IMG_2041.jpg"
+    ],
+    "expected_workflow_status": "verified",
+    "expected_route": "PROCESS",
+    "expected_issue_kinds": []
+  },
+  "col-20-prompt-injection@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "20-prompt-injection",
+    "subject": "Transcript Verification Application",
+    "sender": "adversary@example.com",
+    "sender_name": "Adversarial Student",
+    "message_id": "<col-20-prompt-injection@falconix.test>",
+    "documents": [
+      "transcript.pdf",
+      "student_id.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "unreliable"
+    ]
+  },
+  "col-21-hard-variants@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "21-hard-variants",
+    "subject": "Challenging Scans and Certificate",
+    "sender": "ravi.s@example.com",
+    "sender_name": "Ravi Shankar",
+    "message_id": "<col-21-hard-variants@falconix.test>",
+    "documents": [
+      "shadowed_marksheet.jpg",
+      "grainy_id.jpg",
+      "decorative_certificate.pdf"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "HUMAN_REVIEW",
+    "expected_issue_kinds": [
+      "poor_quality",
+      "unreliable"
+    ]
+  },
+  "col-22-six-page-retrieval@falconix.test": {
+    "mailbox": "college_applications.mbox",
+    "case_id": "22-six-page-retrieval",
+    "subject": "6-Page Academic Transcript",
+    "sender": "mohan.l@example.com",
+    "sender_name": "Mohan Lal",
+    "message_id": "<col-22-six-page-retrieval@falconix.test>",
+    "documents": [
+      "transcript_6page.pdf",
+      "student_id.jpg"
+    ],
+    "expected_workflow_status": "review_required",
+    "expected_route": "MANUAL_VERIFICATION",
+    "expected_issue_kinds": [
+      "conflict"
+    ]
   }
 }
