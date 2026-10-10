@@ -1,0 +1,142 @@
+{
+  "job_normal_resume.pdf": {
+    "scenario": "job_application",
+    "case_type": "normal",
+    "doc_type": "resume",
+    "expected_statuses": {
+      "applicant_name": "valid",
+      "email": "valid",
+      "highest_qualification": "valid",
+      "institution": "valid",
+      "years_experience": "valid"
+    },
+    "expected_route": "fast_track"
+  },
+  "job_normal_id.jpg": {
+    "scenario": "job_application",
+    "case_type": "normal",
+    "doc_type": "id_document",
+    "expected_statuses": {
+      "applicant_name": "valid",
+      "id_number": "valid",
+      "document_date": "valid"
+    },
+    "expected_route": "fast_track"
+  },
+  "job_missing_field_resume.pdf": {
+    "scenario": "job_application",
+    "case_type": "missing_field",
+    "doc_type": "resume",
+    "expected_statuses": {
+      "applicant_name": "valid",
+      "email": "missing",
+      "years_experience": "missing"
+    },
+    "expected_route": "needs_review"
+  },
+  "job_name_typo_id.jpg": {
+    "scenario": "job_application",
+    "case_type": "name_typo",
+    "doc_type": "id_document",
+    "expected_statuses": {
+      "applicant_name": "conflict",
+      "id_number": "valid"
+    },
+    "expected_route": "needs_review"
+  },
+  "job_conflicting_id.pdf": {
+    "scenario": "job_application",
+    "case_type": "conflicting_id",
+    "doc_type": "id_document",
+    "expected_statuses": {
+      "applicant_name": "valid",
+      "id_number": "conflict"
+    },
+    "expected_route": "needs_review"
+  },
+  "job_unclear_stamp_id.jpg": {
+    "scenario": "job_application",
+    "case_type": "unclear_stamp",
+    "doc_type": "id_document",
+    "expected_statuses": {
+      "id_number": "unclear"
+    },
+    "expected_route": "needs_review"
+  },
+  "job_blurry_photo_resume.jpg": {
+    "scenario": "job_application",
+    "case_type": "blurry_photo",
+    "doc_type": "resume",
+    "expected_quality": "poor",
+    "expected_route": "needs_review"
+  },
+  "job_unknown_menu.pdf": {
+    "scenario": "job_application",
+    "case_type": "unknown_document",
+    "doc_type": "unknown",
+    "expected_statuses": {},
+    "expected_route": "manual_review"
+  },
+  "job_multipage_differing_value.pdf": {
+    "scenario": "job_application",
+    "case_type": "multipage_differing_value",
+    "doc_type": "id_document",
+    "expected_statuses": {
+      "id_number": "conflict"
+    },
+    "expected_route": "needs_review"
+  },
+  "college_normal_marksheet.pdf": {
+    "scenario": "college",
+    "case_type": "normal",
+    "doc_type": "marksheet",
+    "expected_statuses": {
+      "applicant_name": "valid",
+      "marks_or_grade": "valid",
+      "institution": "valid",
+      "course": "valid",
+      "issue_date": "valid"
+    },
+    "expected_route": "fast_track"
+  },
+  "college_normal_id.jpg": {
+    "scenario": "college",
+    "case_type": "normal",
+    "doc_type": "id_document",
+    "expected_statuses": {
+      "applicant_name": "valid",
+      "date_of_birth": "valid",
+      "id_number": "valid"
+    },
+    "expected_route": "fast_track"
+  },
+  "college_missing_date_marksheet.pdf": {
+    "scenario": "college",
+    "case_type": "missing_field",
+    "doc_type": "marksheet",
+    "expected_statuses": {
+      "applicant_name": "valid",
+      "issue_date": "missing"
+    },
+    "expected_route": "needs_review"
+  },
+  "college_name_typo_id.jpg": {
+    "scenario": "college",
+    "case_type": "name_typo",
+    "doc_type": "id_document",
+    "expected_statuses": {
+      "applicant_name": "conflict",
+      "id_number": "valid"
+    },
+    "expected_route": "needs_review"
+  },
+  "college_future_dob_id.pdf": {
+    "scenario": "college",
+    "case_type": "conflicting_date",
+    "doc_type": "id_document",
+    "expected_statuses": {
+      "date_of_birth": "conflict"
+    },
+    "expected_route": "needs_review"
+  }
+}
