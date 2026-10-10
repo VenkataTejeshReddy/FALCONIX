@@ -1,0 +1,23 @@
+[
+  {
+    "field": "applicant_name",
+    "value": "Rohan Verma",
+    "status": "conflict",
+    "confidence": 0.85,
+    "reason": "Fixture: defect=typo altered_field=applicant_name"
+  },
+  {
+    "field": "id_number",
+    "value": "236123456782",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=typo altered_field=applicant_name"
+  },
+  {
+    "field": "document_date",
+    "value": "2023-01-15",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=typo altered_field=applicant_name"
+  }
+]

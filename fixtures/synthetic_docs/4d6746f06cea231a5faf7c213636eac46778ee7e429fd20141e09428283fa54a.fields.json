@@ -1,0 +1,37 @@
+[
+  {
+    "field": "applicant_name",
+    "value": "Ananya Iyer",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=missing altered_field=issue_date"
+  },
+  {
+    "field": "marks_or_grade",
+    "value": "8.8 CGPA",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=missing altered_field=issue_date"
+  },
+  {
+    "field": "institution",
+    "value": "National Institute of Technology",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=missing altered_field=issue_date"
+  },
+  {
+    "field": "course",
+    "value": "Computer Engineering",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=missing altered_field=issue_date"
+  },
+  {
+    "field": "issue_date",
+    "value": "2023-06-20",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=missing altered_field=issue_date"
+  }
+]

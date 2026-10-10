@@ -1,0 +1,9 @@
+[
+  {
+    "field": "applicant_name",
+    "value": "Vikramaditya Rao",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=none"
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "doc_type": "unknown",
+  "confidence": 0.0,
+  "layer": "fixture",
+  "reasons": [
+    "Fixture-based classification from ground_truth.json",
+    "scenario=college defect=unknown_type"
+  ],
+  "scores": {}
+}

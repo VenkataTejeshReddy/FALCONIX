@@ -1,0 +1,23 @@
+[
+  {
+    "field": "applicant_name",
+    "value": "Ananya Iyer",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=conflict"
+  },
+  {
+    "field": "date_of_birth",
+    "value": "2001-04-12",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=conflict"
+  },
+  {
+    "field": "id_number",
+    "value": "348912345678",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=conflict"
+  }
+]

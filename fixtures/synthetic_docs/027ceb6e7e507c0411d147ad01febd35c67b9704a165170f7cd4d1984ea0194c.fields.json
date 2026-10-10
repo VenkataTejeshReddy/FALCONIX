@@ -1,0 +1,44 @@
+[
+  {
+    "field": "applicant_name",
+    "value": "Rohan Verma",
+    "status": "unclear",
+    "confidence": 0.4,
+    "reason": "Fixture: defect=blur"
+  },
+  {
+    "field": "email",
+    "value": "rohan.verma@example.com",
+    "status": "unclear",
+    "confidence": 0.4,
+    "reason": "Fixture: defect=blur"
+  },
+  {
+    "field": "phone",
+    "value": "+91 98765 43210",
+    "status": "unclear",
+    "confidence": 0.4,
+    "reason": "Fixture: defect=blur"
+  },
+  {
+    "field": "highest_qualification",
+    "value": "B.Tech Computer Science",
+    "status": "unclear",
+    "confidence": 0.4,
+    "reason": "Fixture: defect=blur"
+  },
+  {
+    "field": "institution",
+    "value": "Indian Institute of Technology",
+    "status": "unclear",
+    "confidence": 0.4,
+    "reason": "Fixture: defect=blur"
+  },
+  {
+    "field": "years_experience",
+    "value": "4",
+    "status": "unclear",
+    "confidence": 0.4,
+    "reason": "Fixture: defect=blur"
+  }
+]

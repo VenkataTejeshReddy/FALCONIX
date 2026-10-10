@@ -1,0 +1,23 @@
+[
+  {
+    "field": "applicant_name",
+    "value": "Ananya Iyer",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=none"
+  },
+  {
+    "field": "registration_number",
+    "value": "NIT-2021-0045",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=none"
+  },
+  {
+    "field": "institution",
+    "value": "National Institute of Technology",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=none"
+  }
+]

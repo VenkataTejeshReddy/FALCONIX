@@ -1,0 +1,23 @@
+[
+  {
+    "field": "applicant_name",
+    "value": "Rohan Verma",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=conflict altered_field=id_number"
+  },
+  {
+    "field": "id_number",
+    "value": "236123456782",
+    "status": "conflict",
+    "confidence": 0.85,
+    "reason": "Fixture: defect=conflict altered_field=id_number"
+  },
+  {
+    "field": "document_date",
+    "value": "2023-01-15",
+    "status": "valid",
+    "confidence": 0.95,
+    "reason": "Fixture: defect=conflict altered_field=id_number"
+  }
+]

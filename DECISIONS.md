@@ -132,3 +132,18 @@ documents. We evaluated `FlagEmbedding` vs `sentence-transformers` + `rank-bm25`
 **Consequences:** Clean dependency tree, direct HuggingFace cache loading on Apple Silicon
 MPS, and reproducible lockfile across environments.
 
+---
+
+## ADR-009: Keying and Cross-Comparing Duplicate Document Types
+
+**Status:** Accepted
+
+**Context:** A case may contain multiple documents of the same type (for example, two resumes or two identity documents). When storing extracted fields on `CaseRecord.fields`, keys cannot collide without overwriting valid data. Furthermore, field discrepancies between these instances should be detected.
+
+**Decision:** 
+1. When more than one document in a single case shares a `doc_type`, the first document uses `<doc_type>.<field>` via `field_key(doc_type, field)`.
+2. Subsequent documents of the same type append an instance suffix `#N` (e.g. `<doc_type>#2.<field>`).
+3. Extracted fields from duplicate document types are cross-compared to identify any field-level inconsistencies or conflicts across instances of the same document type.
+
+**Consequences:** Field keys remain unambiguous across all attachments. Multi-document submissions retain full auditability without field collisions.
+
