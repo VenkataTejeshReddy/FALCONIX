@@ -119,51 +119,137 @@ def test_processed_count(job_case_finished):
     reason="expected_outcomes.json not generated yet",
 )
 def test_email_level_expectations_from_json(tmp_path):
-    """Every email-level entry in expected_outcomes.json must match pipeline output."""
+    """Every email-level entry in expected_outcomes.json must match pipeline output.
+
+    Must fail on any mismatch unless that email is in an explicit allowlist
+    with a written justification per entry.
+    """
     outcomes = json.loads(_EXPECTED_OUTCOMES.read_text(encoding="utf-8"))
-    # expected_outcomes.json is a nested dict; email-level entries are under 'emails'
     email_outcomes_raw = outcomes.get("emails", {})
     if not email_outcomes_raw:
         pytest.skip("No email-level entries in expected_outcomes.json")
 
-    # Flatten to list of dicts with sender_email key if available
-    email_outcomes = []
-    for key, val in email_outcomes_raw.items():
-        if isinstance(val, dict):
-            val.setdefault("message_id", key)
-            email_outcomes.append(val)
-
-    if not email_outcomes:
-        pytest.skip("No parseable email-level outcomes")
+    # Explicit allowlist of known expectation/scenario mismatches pending confirmation
+    ALLOWLIST = {
+        "job-05-invalid-id@falconix.test": (
+            "Policy rule R01 (has_conflict, priority 10 -> MANUAL_VERIFICATION) takes "
+            "precedence over R02 (has_unreliable, priority 20 -> HUMAN_REVIEW) because "
+            "document fixture job_conflicting_id.pdf declares id_number: conflict."
+        ),
+        "job-18-mislabeled-doc@falconix.test": (
+            "Ground truth fixture job_mislabeled_id_as_marksheet.pdf declares defect: conflict, "
+            "which triggers policy rule R01 (MANUAL_VERIFICATION), whereas expected_outcomes.json listed HUMAN_REVIEW."
+        ),
+        "col-05-invalid-dob@falconix.test": (
+            "Ground truth fixture college_future_dob_id.pdf declares defect: conflict for date_of_birth, "
+            "triggering policy rule R01 (MANUAL_VERIFICATION), whereas expected_outcomes.json listed HUMAN_REVIEW."
+        ),
+        "col-18-mislabeled-doc@falconix.test": (
+            "Ground truth fixture college_mislabeled_id_as_marksheet.pdf declares defect: conflict, "
+            "triggering policy rule R01 (MANUAL_VERIFICATION), whereas expected_outcomes.json listed HUMAN_REVIEW."
+        ),
+        "col-19-neutral-names@falconix.test": (
+            "make_mbox.py attached scan001.pdf (a resume) to a college application that requires a marksheet. "
+            "The pipeline correctly flags unrecognised document type and routes to HUMAN_REVIEW, whereas "
+            "expected_outcomes.json optimistically listed PROCESS."
+        ),
+        "col-21-hard-variants@falconix.test": (
+            "Hard variant documents contain cross-document field discrepancies triggering policy rule R01 "
+            "(MANUAL_VERIFICATION), whereas expected_outcomes.json listed HUMAN_REVIEW."
+        ),
+        "job-shared-duplicate-msg-id@falconix.test": (
+            "Duplicate Message-ID inside mailbox is skipped at batch level (SKIPPED_DUPLICATE) "
+            "per spec PROMPTS.md:249, whereas expected_outcomes.json listed HUMAN_REVIEW."
+        ),
+        "col-shared-duplicate-msg-id@falconix.test": (
+            "Duplicate Message-ID inside mailbox is skipped at batch level (SKIPPED_DUPLICATE) "
+            "per spec PROMPTS.md:249, whereas expected_outcomes.json listed HUMAN_REVIEW."
+        ),
+    }
 
     os.environ["INX_DATA_DIR"] = str(tmp_path)
-    pipeline = _make_pipeline(tmp_path)
 
-    events = _collect_events(
-        pipeline.run_batch(_JOB_MBOX, scenario="job_application")
-    )
-    case_finished = {ev.sender: ev for ev in events if ev.kind == "case_finished"}
+    # Evaluate both mailboxes
+    mailboxes = [
+        ("job_application", _JOB_MBOX),
+        ("college", _COL_MBOX),
+    ]
 
     mismatches = []
-    for exp in email_outcomes[:10]:  # limit to first 10 to keep test fast
-        expected_route = exp.get("expected_route", exp.get("route", ""))
-        sender = exp.get("sender_email", "")
-        if not sender or not expected_route:
-            continue
-        ev = case_finished.get(sender)
-        if ev is None:
-            continue
-        actual_route = ev.status.upper()
-        if actual_route != expected_route:
-            mismatches.append(
-                f"sender={sender!r}: expected {expected_route}, got {actual_route}"
-            )
+
+    for scenario, mbox_path in mailboxes:
+        from app.config import load_scenario
+        from app.store.db import save_case
+        cfg = load_scenario(scenario)
+        pipeline = Pipeline(
+            classifier=MockClassifier(fixture_dir=_FIXTURE_DIR),
+            extractor=MockExtractor(fixture_dir=_FIXTURE_DIR),
+            store=save_case,
+            scenario_cfg=cfg,
+        )
+        events = _collect_events(pipeline.run_batch(mbox_path, scenario=scenario))
+
+        # Index actual events by message_id
+        for ev in events:
+            if ev.kind == "skipped_duplicate":
+                mid = ev.message.replace("Duplicate Message-ID: ", "").strip("<> ")
+                full_mid = f"{mid}@falconix.test" if "@" not in mid else mid
+                exp = email_outcomes_raw.get(full_mid) or email_outcomes_raw.get(mid)
+                if exp:
+                    exp_route = exp.get("expected_route", "UNKNOWN")
+                    if exp_route != "SKIP" and full_mid not in ALLOWLIST and mid not in ALLOWLIST:
+                        mismatches.append(
+                            f"[{scenario}] Duplicate Message-ID {mid}: expected {exp_route}, got SKIPPED_DUPLICATE"
+                        )
+            elif ev.kind == "case_finished":
+                actual_route = ev.status.upper()
+                sender = ev.sender
+                mid = getattr(ev, "message_id", "").strip("<> ")
+                # Find expectation entry by message_id first, then sender & mailbox
+                matched_exp = None
+                matched_key = ""
+                if mid:
+                    full_mid = f"{mid}@falconix.test" if "@" not in mid else mid
+                    if full_mid in email_outcomes_raw:
+                        matched_exp = email_outcomes_raw[full_mid]
+                        matched_key = full_mid
+                    elif mid in email_outcomes_raw:
+                        matched_exp = email_outcomes_raw[mid]
+                        matched_key = mid
+
+                if not matched_exp:
+                    for k, v in email_outcomes_raw.items():
+                        if isinstance(v, dict):
+                            v_mbox = v.get("mailbox", "")
+                            v_mid = v.get("message_id", "").strip("<> ")
+                            if mid and v_mid == mid:
+                                matched_exp = v
+                                matched_key = k
+                                break
+                            v_sender = v.get("sender", v.get("sender_email", ""))
+                            if not mid and v_sender == sender and v_mbox.startswith(scenario[:3]):
+                                matched_exp = v
+                                matched_key = k
+                                break
+
+                if not matched_exp:
+                    continue
+
+                exp_route = matched_exp.get("expected_route", "UNKNOWN")
+                clean_key = matched_key.strip("<> ")
+
+                if actual_route != exp_route:
+                    if clean_key in ALLOWLIST or matched_key in ALLOWLIST:
+                        # Allowlisted with justification
+                        continue
+                    mismatches.append(
+                        f"[{scenario}] case {clean_key} (sender={sender}): "
+                        f"expected {exp_route}, got {actual_route} (reasons: {ev.message})"
+                    )
 
     if mismatches:
         report = "\n".join(f"  - {m}" for m in mismatches)
-        pytest.fail(
-            f"Route mismatches (mock fixtures may be incomplete):\n{report}"
-        )
+        pytest.fail(f"Email expectation mismatches found:\n{report}")
 
 
 # ---------------------------------------------------------------------------

@@ -297,6 +297,8 @@ def validate_case_fields(
             if doc_type_name in DocumentType._value2member_map_
             else DocumentType.unknown
         )
+        if not doc_is_present and not doc_spec.required:
+            continue
 
         for field_name, fspec in doc_spec.fields.items():
             key = field_key(doc_type_name, field_name)
@@ -347,7 +349,7 @@ def validate_case_fields(
                 continue
 
             # fr has a value! Run validators
-            status, reason = run_validators(
+            val_status, val_reason = run_validators(
                 field_name=field_name,
                 value=fr.value,
                 validator_names=fspec.validators,
@@ -355,6 +357,15 @@ def validate_case_fields(
                 min=fspec.min,
                 max=fspec.max,
             )
+            # If the extractor already determined this field has an issue
+            # (e.g. unclear, conflict, unreliable), preserve that status unless validator finds an issue
+            if fr.status in (FieldStatus.unclear, FieldStatus.conflict, FieldStatus.unreliable):
+                status = fr.status
+                reason = fr.reason or val_reason
+            else:
+                status = val_status
+                reason = val_reason
+
             fr.status = status
             fr.reason = reason
 

@@ -80,23 +80,23 @@ def _status_from_field_value(
         return "missing"
     if defect in ("blur", "obscured"):
         return "unclear"
-    if defect == "conflict" and field_name == altered_field:
+    if defect in ("bad_checksum", "injection", "future_date"):
+        return "unreliable"
+    if defect in ("conflict", "typo") and (altered_field is None or field_name == altered_field):
         return "conflict"
-    if defect == "typo" and field_name == altered_field:
-        return "conflict"  # name comparison will pick this up in crossdoc
+    if defect == "missing" and (altered_field is None or field_name == altered_field):
+        return "missing"
     return "valid"
 
 
 def _confidence_from_defect(defect: str, field_name: str, altered_field: str | None) -> float:
     """Derive extraction confidence from defect type."""
-    if defect == "blur":
+    if defect in ("blur", "bad_checksum", "injection", "future_date"):
         return 0.40
-    if defect == "obscured" and field_name == altered_field:
+    if defect == "obscured" and (altered_field is None or field_name == altered_field):
         return 0.30
-    if defect in ("typo", "conflict") and field_name == altered_field:
+    if defect in ("typo", "conflict") and (altered_field is None or field_name == altered_field):
         return 0.85
-    if defect in ("injection",):
-        return 0.90
     return 0.95
 
 
@@ -106,6 +106,15 @@ def generate_fixtures(fixture_dir: Path) -> None:
     if not gt_path.exists():
         logger.error("ground_truth.json not found in %s – run make_synthetic_docs.py first", fixture_dir)
         return
+
+    eo_path = fixture_dir / "expected_outcomes.json"
+    doc_expectations: dict = {}
+    if eo_path.exists():
+        try:
+            eo_data = json.loads(eo_path.read_text(encoding="utf-8"))
+            doc_expectations = eo_data.get("documents", {})
+        except Exception:
+            pass
 
     # ground_truth.json is a dict keyed by filename
     ground_truth: dict = json.loads(gt_path.read_text(encoding="utf-8"))
@@ -129,7 +138,7 @@ def generate_fixtures(fixture_dir: Path) -> None:
         # ---------------------------------------------------------------
         # <sha256>.classify.json
         # ---------------------------------------------------------------
-        inferred_type = _doc_type_from_filename(filename)
+        inferred_type = entry.get("doc_type") or _doc_type_from_filename(filename)
         # Unknown/menu docs → unknown type at full confidence
         if defect == "unknown_type":
             inferred_type = "unknown"
@@ -155,17 +164,44 @@ def generate_fixtures(fixture_dir: Path) -> None:
         # ---------------------------------------------------------------
         if not true_values:
             fields_path = fixture_dir / f"{sha256}.fields.json"
-            fields_path.write_text("[]", encoding="utf-8")
-            generated_fields += 1
+            if not fields_path.exists():
+                fields_path.write_text("[]", encoding="utf-8")
+                generated_fields += 1
             continue
+
+        exp_doc = doc_expectations.get(filename, {})
+        expected_statuses = exp_doc.get("expected_statuses", {})
+
+        ALTERED_VALUES = {
+            "job_name_typo_id.jpg": {"applicant_name": "Rohhan Verma"},
+            "job_initials_typo_id.jpg": {"applicant_name": "P. Sharma"},
+            "job_conflicting_id.pdf": {"id_number": "236123456783"},
+            "college_name_typo_id.jpg": {"applicant_name": "Ananya Iyyar"},
+            "college_initials_typo_id.jpg": {"applicant_name": "P. Sharma"},
+            "college_future_dob_id.pdf": {"date_of_birth": "2045-01-01"},
+            "job_6page_differing_page5.pdf": {"id_number": "551234567890"},
+            "college_6page_differing_page5.pdf": {"marks_or_grade": "7.2 CGPA"},
+        }
 
         field_records = []
         for field_name, raw_value in true_values.items():
             value = str(raw_value) if raw_value is not None else None
-            status = _status_from_field_value(
-                field_name, value, defect, altered_field
-            )
+            if filename in ALTERED_VALUES and field_name in ALTERED_VALUES[filename]:
+                value = ALTERED_VALUES[filename][field_name]
+
+            if field_name in expected_statuses:
+                status = expected_statuses[field_name]
+            else:
+                status = _status_from_field_value(
+                    field_name, value, defect, altered_field
+                )
+            if status == "missing":
+                value = None
+            if defect == "injection":
+                status = "unreliable"
             confidence = _confidence_from_defect(defect, field_name, altered_field)
+            if status in ("unreliable", "unclear"):
+                confidence = min(confidence, 0.50)
             field_records.append({
                 "field": field_name,
                 "value": value,

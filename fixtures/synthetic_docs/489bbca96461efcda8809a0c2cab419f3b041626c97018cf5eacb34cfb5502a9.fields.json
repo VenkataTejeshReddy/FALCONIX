@@ -8,7 +8,7 @@
   },
   {
     "field": "marks_or_grade",
-    "value": "8.8 CGPA",
+    "value": "7.2 CGPA",
     "status": "conflict",
     "confidence": 0.85,
     "reason": "Fixture: defect=conflict altered_field=marks_or_grade"

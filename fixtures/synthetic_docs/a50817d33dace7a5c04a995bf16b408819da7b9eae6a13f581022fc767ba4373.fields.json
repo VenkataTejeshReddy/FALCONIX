@@ -1,7 +1,7 @@
 [
   {
     "field": "applicant_name",
-    "value": "Priya Sharma",
+    "value": "P. Sharma",
     "status": "conflict",
     "confidence": 0.85,
     "reason": "Fixture: defect=typo altered_field=applicant_name"

@@ -29,8 +29,8 @@
   },
   {
     "field": "issue_date",
-    "value": "2023-06-20",
-    "status": "valid",
+    "value": null,
+    "status": "missing",
     "confidence": 0.95,
     "reason": "Fixture: defect=missing altered_field=issue_date"
   }

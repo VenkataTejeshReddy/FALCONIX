@@ -8,7 +8,7 @@
   },
   {
     "field": "id_number",
-    "value": "236123456782",
+    "value": "551234567890",
     "status": "conflict",
     "confidence": 0.85,
     "reason": "Fixture: defect=conflict altered_field=id_number"

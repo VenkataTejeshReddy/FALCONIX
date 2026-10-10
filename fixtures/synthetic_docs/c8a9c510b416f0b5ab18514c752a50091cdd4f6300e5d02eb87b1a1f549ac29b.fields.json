@@ -8,8 +8,8 @@
   },
   {
     "field": "email",
-    "value": "rohan.verma@example.com",
-    "status": "valid",
+    "value": null,
+    "status": "missing",
     "confidence": 0.95,
     "reason": "Fixture: defect=missing altered_field=email"
   },
@@ -36,8 +36,8 @@
   },
   {
     "field": "years_experience",
-    "value": "4",
-    "status": "valid",
+    "value": null,
+    "status": "missing",
     "confidence": 0.95,
     "reason": "Fixture: defect=missing altered_field=email"
   }

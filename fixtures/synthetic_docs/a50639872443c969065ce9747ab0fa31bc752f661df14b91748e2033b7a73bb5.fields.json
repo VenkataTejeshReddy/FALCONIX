@@ -2,43 +2,43 @@
   {
     "field": "applicant_name",
     "value": "Rohan Verma",
-    "status": "valid",
-    "confidence": 0.9,
+    "status": "unreliable",
+    "confidence": 0.4,
     "reason": "Fixture: defect=injection"
   },
   {
     "field": "email",
     "value": "rohan.verma@example.com",
-    "status": "valid",
-    "confidence": 0.9,
+    "status": "unreliable",
+    "confidence": 0.4,
     "reason": "Fixture: defect=injection"
   },
   {
     "field": "phone",
     "value": "+91 98765 43210",
-    "status": "valid",
-    "confidence": 0.9,
+    "status": "unreliable",
+    "confidence": 0.4,
     "reason": "Fixture: defect=injection"
   },
   {
     "field": "highest_qualification",
     "value": "B.Tech Computer Science",
-    "status": "valid",
-    "confidence": 0.9,
+    "status": "unreliable",
+    "confidence": 0.4,
     "reason": "Fixture: defect=injection"
   },
   {
     "field": "institution",
     "value": "Indian Institute of Technology",
-    "status": "valid",
-    "confidence": 0.9,
+    "status": "unreliable",
+    "confidence": 0.4,
     "reason": "Fixture: defect=injection"
   },
   {
     "field": "years_experience",
     "value": "4",
-    "status": "valid",
-    "confidence": 0.9,
+    "status": "unreliable",
+    "confidence": 0.4,
     "reason": "Fixture: defect=injection"
   }
 ]

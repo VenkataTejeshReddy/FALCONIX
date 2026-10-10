@@ -3,7 +3,7 @@
     "field": "applicant_name",
     "value": "Rohan Verma",
     "status": "unclear",
-    "confidence": 0.95,
+    "confidence": 0.5,
     "reason": "Fixture: defect=obscured altered_field=id_number"
   },
   {
@@ -17,7 +17,7 @@
     "field": "document_date",
     "value": "2023-01-15",
     "status": "unclear",
-    "confidence": 0.95,
+    "confidence": 0.5,
     "reason": "Fixture: defect=obscured altered_field=id_number"
   }
 ]

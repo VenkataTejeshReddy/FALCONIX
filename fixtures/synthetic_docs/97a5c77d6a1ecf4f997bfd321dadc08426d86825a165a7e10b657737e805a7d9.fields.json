@@ -3,7 +3,7 @@
     "field": "applicant_name",
     "value": "Ananya Iyer",
     "status": "unclear",
-    "confidence": 0.95,
+    "confidence": 0.5,
     "reason": "Fixture: defect=obscured altered_field=marks_or_grade"
   },
   {
@@ -17,21 +17,21 @@
     "field": "institution",
     "value": "National Institute of Technology",
     "status": "unclear",
-    "confidence": 0.95,
+    "confidence": 0.5,
     "reason": "Fixture: defect=obscured altered_field=marks_or_grade"
   },
   {
     "field": "course",
     "value": "Computer Engineering",
     "status": "unclear",
-    "confidence": 0.95,
+    "confidence": 0.5,
     "reason": "Fixture: defect=obscured altered_field=marks_or_grade"
   },
   {
     "field": "issue_date",
     "value": "2023-06-20",
     "status": "unclear",
-    "confidence": 0.95,
+    "confidence": 0.5,
     "reason": "Fixture: defect=obscured altered_field=marks_or_grade"
   }
 ]
