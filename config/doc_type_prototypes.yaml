@@ -1,0 +1,210 @@
+# Document Type Prototypes for FALCONIX Hierarchical Classifier
+# Archetypes matching DocumentType enum in app/schemas.py
+
+resume:
+  description: "A curriculum vitae or professional resume detailing an applicant's work experience, employment history, technical skills, academic qualifications, and contact details."
+  keywords:
+    candidate profile evaluation: 4.0
+    candidate profile: 3.5
+    curriculum vitae: 3.5
+    resume: 3.5
+    résumé: 3.5
+    work experience: 3.0
+    employment history: 3.0
+    professional experience: 2.5
+    highest qualification: 2.5
+    years experience: 2.5
+    technical skills: 2.0
+    projects: 1.5
+    education: 1.5
+  negative_keywords:
+    dinner menu: 4.0
+    appetizer: 3.5
+    first course: 3.5
+    main course: 3.5
+    dessert: 3.0
+    statement of marks: 3.5
+    mark sheet: 3.5
+    marksheet: 3.5
+    government identification: 3.0
+    student identification: 3.0
+    identity card: 3.0
+  layout_hints:
+    has_contact_info: true
+    multi_section: true
+
+id_document:
+  description: "An official government-issued identification card, national identity card, passport, or identity credential bearing personal identification numbers, date of birth, and issuing authority verification."
+  keywords:
+    government identification card: 4.0
+    government identification: 4.0
+    student identification card: 4.0
+    student identification: 3.5
+    national identity: 3.5
+    identification number: 3.5
+    identity card: 3.5
+    official record: 3.5
+    consolidated dossier: 3.5
+    central verification bureau: 3.0
+    issuing authority: 2.5
+    id number: 3.0
+    date of birth: 2.5
+    date of issue: 2.0
+    aadhaar: 3.0
+    passport: 3.0
+    national id: 3.0
+  negative_keywords:
+    dinner menu: 4.0
+    appetizer: 3.5
+    first course: 3.5
+    main course: 3.5
+    curriculum vitae: 3.5
+    statement of marks: 3.5
+    mark sheet: 3.5
+    marksheet: 3.5
+  layout_hints:
+    id_pattern: true
+    max_pages: 1
+
+marksheet:
+  description: "An official statement of marks or academic mark sheet displaying semester grades, course subjects, cumulative grade point average (CGPA), and academic evaluation scores."
+  keywords:
+    academic credential verification: 4.0
+    academic credential: 3.5
+    statement of marks: 4.0
+    statement of marks – semester: 4.0
+    marksheet: 3.5
+    mark sheet: 3.5
+    marks or grade: 3.5
+    cgpa: 3.0
+    semester: 2.5
+    computer engineering: 2.0
+    marks obtained: 2.5
+    grade: 2.0
+    total marks: 2.0
+    credits: 1.5
+    examination: 1.5
+  negative_keywords:
+    dinner menu: 4.0
+    appetizer: 3.5
+    first course: 3.5
+    main course: 3.5
+    curriculum vitae: 3.5
+    work experience: 3.0
+    employment history: 3.0
+    government identification: 3.0
+  layout_hints:
+    has_grades: true
+    table_structure: true
+
+registration_letter:
+  description: "An official institution registration letter, enrollment confirmation, or completion certificate confirming a student's assigned registration number and institutional affiliation."
+  keywords:
+    institution registration letter: 4.0
+    registration letter: 3.5
+    registration number: 3.5
+    certificate of completion: 3.5
+    registered student: 3.0
+    enrollment confirmation: 3.0
+    reg number: 2.5
+    roll number: 2.5
+    national institute of technology: 2.5
+    formally presented to: 3.0
+  negative_keywords:
+    dinner menu: 4.0
+    appetizer: 3.5
+    first course: 3.5
+    main course: 3.5
+    curriculum vitae: 3.5
+    work experience: 3.0
+    employment history: 3.0
+    statement of marks: 3.0
+  layout_hints:
+    formal_letter: true
+    has_reg_number: true
+
+cover_letter:
+  description: "A formal cover letter addressed to a prospective employer or institution outlining a candidate's background, interest, and motivation for an application."
+  keywords:
+    cover letter: 4.0
+    dear hiring manager: 3.5
+    dear admissions committee: 3.5
+    i am writing to apply: 3.5
+    application for: 2.5
+    sincerely: 2.0
+    respectfully: 2.0
+  negative_keywords:
+    dinner menu: 4.0
+    statement of marks: 3.5
+    mark sheet: 3.5
+    curriculum vitae: 2.5
+  layout_hints:
+    formal_letter: true
+
+transcript:
+  description: "A comprehensive cumulative academic transcript detailing an entire multi-year educational record of courses, credits, grades, and degree progress."
+  keywords:
+    academic transcript: 4.0
+    transcript of records: 4.0
+    official transcript: 3.5
+    cumulative gpa: 3.0
+    semester credits: 2.5
+    course title: 2.0
+  negative_keywords:
+    dinner menu: 4.0
+    curriculum vitae: 3.5
+    work experience: 3.0
+    government identification: 3.0
+  layout_hints:
+    table_structure: true
+    multi_page: true
+
+degree_certificate:
+  description: "An official university diploma or degree certificate formally conferring an academic title, bachelor, master, or doctoral degree upon graduation."
+  keywords:
+    degree certificate: 4.0
+    awarded the degree: 4.0
+    conferred upon: 3.5
+    bachelor of: 3.0
+    master of: 3.0
+    doctor of: 3.0
+    in witness whereof: 2.5
+  negative_keywords:
+    dinner menu: 4.0
+    curriculum vitae: 3.5
+    work experience: 3.0
+  layout_hints:
+    certificate_border: true
+
+offer_letter:
+  description: "An official offer letter of employment or admission specifying proposed position terms, compensation, start date, and acceptance conditions."
+  keywords:
+    offer letter: 4.0
+    offer of employment: 4.0
+    offer of admission: 4.0
+    pleased to offer you: 3.5
+    terms of offer: 3.0
+    start date: 2.0
+    compensation: 2.0
+  negative_keywords:
+    dinner menu: 4.0
+    curriculum vitae: 3.5
+    marksheet: 3.5
+  layout_hints:
+    formal_letter: true
+
+reference_letter:
+  description: "A professional recommendation or reference letter evaluating an applicant's competence, work performance, and personal integrity."
+  keywords:
+    letter of recommendation: 4.0
+    reference letter: 4.0
+    letter of reference: 4.0
+    to whom it may concern: 3.5
+    it is my pleasure to recommend: 3.5
+    recommending: 2.5
+  negative_keywords:
+    dinner menu: 4.0
+    curriculum vitae: 3.5
+    statement of marks: 3.5
+  layout_hints:
+    formal_letter: true
