@@ -2,7 +2,11 @@
 """INX – Classify package."""
 
 from app.classify.base import ClassificationResult, Classifier
-from app.classify.classifier import DocumentClassifier, classify_documents
+try:
+    from app.classify.classifier import DocumentClassifier, classify_documents
+except ImportError:
+    DocumentClassifier = None  # type: ignore
+    classify_documents = None  # type: ignore
 from app.classify.mock_classifier import MockClassifier
 from app.classify.rules import classify_by_keywords, score_document_rules
 
