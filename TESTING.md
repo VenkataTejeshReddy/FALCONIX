@@ -29,10 +29,27 @@ pytest tests/ --cov=app --cov-report=term-missing
 
 | File | Scope | Laptop |
 |---|---|---|
-| `tests/test_schemas.py` | Pydantic round-trips, enum validation | Both |
-| `tests/test_config.py` | YAML loading, ScenarioConfig validation | Both |
-| `tests/test_mock_reader.py` | MockReader fixture lookup | Both |
-| `tests/test_pipeline.py` | Full pipeline with MockReader | Both |
+| `tests/test_schemas.py` | Pydantic model round-trips, enum validation, JSON schemas | Both |
+| `tests/test_config.py` | YAML config loading, ScenarioConfig validation | Both |
+| `tests/test_mock_reader.py` | MockReader fixture lookup & caching | Both |
+| `tests/test_ingest.py` | Ingestion, SHA-256 deduplication, image quality flags, PDF extraction | Both |
+| `tests/test_batch.py` | ZIP expansion, directory crawling, zip bomb/slip safety | Both |
+| `tests/test_intake.py` | Mbox/eml intake, upfront counts, header deduplication | Both |
+| `tests/test_parse.py` | PDF text layer, RapidOCR fallback, Apple Vision OCR, Docling tables | Both (`@pytest.mark.mac` for Mac OCR) |
+| `tests/test_extract.py` | Fuzzy regex anchor extraction, bbox scaling, confidence scoring | Both |
+| `tests/test_classify.py` | Hierarchical classifier (Layer 1 rules, Layer 2 embeddings, Layer 3 VLM) | Both (`@pytest.mark.mac` for Mac live) |
+| `tests/test_validate_dates.py` | Date parsing (dayfirst/yearfirst), expiry & age rules | Both |
+| `tests/test_validate_identifiers.py` | Regex patterns, Luhn check, checksum validation | Both |
+| `tests/test_validate_crossdoc.py` | Name similarity, cross-document consistency checks | Both |
+| `tests/test_validate_checks.py` | Rule-based document consistency & validation rules | Both |
+| `tests/test_decide_engine.py` | Deterministic policy evaluation, rule prioritization, routing | Both |
+| `tests/test_store.py` | SQLite schema, case saving, event appending, hash-chain audit log | Both |
+| `tests/test_protocols.py` | Protocol structural subtyping verification (runtime checks) | Both |
+| `tests/test_fixtures.py` | Synthetic fixture integrity, JSON schema validation | Both |
+| `tests/test_pipeline.py` | End-to-end pipeline execution with MockReader & full mailbox runs | Both |
+| `tests/test_report.py` | Atomic ExcelReport multi-sheet generation (Applicants, Fields, Issues, Run) | Both |
+| `tests/test_notify.py` | Jinja2 templated notifications, outbox DB, DRY_RUN & allowlist safety | Both |
+| `tests/test_ui.py` | Streamlit AppTest smoke tests (Home, Quick Check, Batch, Reviewer audit) | Both |
 
 ---
 
@@ -100,3 +117,45 @@ jobs:
       - run: pip install -r requirements-core.txt
       - run: pytest tests/ -v
 ```
+
+---
+
+## Operating Modes: Mock vs Real
+
+INX supports dual execution modes controlled by the `INX_MODE` environment variable:
+
+| Mode | Environment | Description |
+|---|---|---|
+| `INX_MODE=mock` | Laptop B (Windows), CI, Unit Tests | Zero GPU/model dependencies. Uses `MockReader` looking up synthetic JSON fixtures in `fixtures/synthetic_docs/`. Instantaneous processing for rapid verification. |
+| `INX_MODE=real` | Laptop A (macOS Apple Silicon) | Full vision/AI stack: Apple Vision OCR / RapidOCR, Docling layout/tables, Qwen3-VL via Ollama, and BGE-M3 embeddings. |
+
+---
+
+## Streamlit UI Smoke Testing
+
+The Streamlit interface is tested headless without requiring a running web server or browser using `streamlit.testing.v1.AppTest`:
+
+```bash
+pytest tests/test_ui.py -v
+```
+
+Smoke test coverage includes:
+1. **Home Scenario Picker**: Verifies scenario cards render and user choice persists in `st.session_state`.
+2. **Quick Check Workflow**: Uploads single document/ZIP fixtures and verifies live processing and policy route assignment.
+3. **Batch Intake Workflow**: Ingests mailbox files in mock mode, asserting live ETA calculation, progress tracking, and results table population.
+4. **Reviewer Action & Audit Integrity**: Simulates reviewer approvals/rejections and validates that immutable audit events are recorded in SQLite and the hash-chain.
+
+---
+
+## Mailbox End-to-End Evaluation
+
+The synthetic mailbox evaluation checks routing accuracy across all synthetic emails in `job_application.mbox` and `college.mbox`:
+
+```bash
+# Run batch pipeline against synthetic mailbox
+python scripts/run_cli.py --source data/synthetic_mailboxes/job_application.mbox --scenario job_application
+
+# Run audit chain verification
+python -c "from app.store.audit import verify_chain; print(verify_chain())"
+```
+

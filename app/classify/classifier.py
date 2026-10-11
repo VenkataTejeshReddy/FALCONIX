@@ -25,7 +25,12 @@ from pathlib import Path
 from typing import Any, Optional
 
 import numpy as np
-import torch
+
+try:
+    import torch
+except ImportError:
+    torch = None
+
 import yaml
 
 from app.classify.base import ClassificationResult, Classifier
@@ -52,7 +57,8 @@ class DocumentClassifier:
         self._prototypes_path = prototypes_path or _PROTOTYPES_PATH
         self._prototypes = load_doc_prototypes(self._prototypes_path)
         self._embedding_model = embedding_model
-        self._embedding_device = "mps" if (hasattr(torch, "mps") and torch.backends.mps.is_available()) else "cpu"
+        has_mps = torch is not None and hasattr(torch, "mps") and torch.backends.mps.is_available()
+        self._embedding_device = "mps" if has_mps else "cpu"
         self._proto_embeddings: Optional[dict[str, np.ndarray]] = None
 
         c_dir = cache_dir or (_REPO_ROOT / "data" / "cache")
@@ -304,7 +310,7 @@ class DocumentClassifier:
             self._embedding_model = None
         self._proto_embeddings = None
 
-        if hasattr(torch, "mps") and torch.backends.mps.is_available():
+        if torch is not None and hasattr(torch, "mps") and torch.backends.mps.is_available():
             torch.mps.empty_cache()
         gc.collect()
         logger.info("DocumentClassifier models unloaded and memory reclaimed.")

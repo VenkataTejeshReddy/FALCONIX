@@ -33,7 +33,7 @@ them against scenario rules, and routes each case to one of four outcomes:
 
 ## Quick start
 
-### Both laptops (Laptop B / CI)
+### Both laptops (Laptop B / CI / Windows)
 
 ```bash
 git clone <repo>
@@ -47,23 +47,26 @@ python scripts/make_synthetic_docs.py --all
 # Run the test suite
 pytest tests/ -v
 
-# Launch the UI
+# Launch the UI (mock mode on Windows – no GPU/models needed)
+set INX_MODE=mock          # Windows
+export INX_MODE=mock       # macOS/Linux
 streamlit run app/ui/streamlit_app.py
 ```
 
-### Laptop A (full model stack)
+### Laptop A (Mac – full model stack)
 
 ```bash
 pip install -r requirements-core.txt -r requirements-models.txt
 
 # Start Ollama with Qwen3-VL
-ollama pull qwen3-vl:4b && ollama serve
+ollama pull qwen3-vl:4b-instruct && ollama serve
 
-# Start Qdrant
+# Start Qdrant (only needed for documents > 3 pages)
 docker run -p 6333:6333 qdrant/qdrant
 
-# Run CLI with docling reader
-python scripts/run_cli.py --source data/batch.mbox --scenario job_application --reader docling
+# Run in real mode
+export INX_MODE=real
+streamlit run app/ui/streamlit_app.py
 ```
 
 ---

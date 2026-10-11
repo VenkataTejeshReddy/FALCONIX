@@ -147,3 +147,49 @@ MPS, and reproducible lockfile across environments.
 
 **Consequences:** Field keys remain unambiguous across all attachments. Multi-document submissions retain full auditability without field collisions.
 
+---
+
+## ADR-010: Atomic Excel Reporting with Multi-Sheet Layout
+
+**Status:** Accepted
+
+**Context:** Batch runs can fail mid-way due to crash or power loss. Standard file appending can leave Excel files corrupted or locked by another process. Furthermore, operational stakeholders require four distinct views: high-level applicant routing, granular field extractions, issue breakdowns, and run configuration metadata.
+
+**Decision:** 
+1. Implement `ExcelReport` (`app/report/excel.py`) using openpyxl with 4 dedicated sheets: `Applicants`, `Fields`, `Issues`, and `Run`.
+2. On every single case completion, append the case rows and write to a temporary file (`.xlsx.tmp`) before atomic rename (`os.replace`) to the run file (`data/reports/<run_id>.xlsx`) and `data/reports/latest.xlsx`.
+
+**Consequences:** At no point is the report in a corrupt or incomplete state. If a batch terminates prematurely, all cases processed up to that instant are completely preserved and readable.
+
+---
+
+## ADR-011: Outbox Pattern and Deterministic Templated Notifications
+
+**Status:** Accepted
+
+**Context:** Automatically emailing applicants based on model extractions poses two major risks: hallucinated policy text / prompt injection from adversarial resumes, and premature or misaddressed email dispatch during testing.
+
+**Decision:**
+1. All generated notifications are rendered deterministically using Jinja2 templates (`app/notify/drafter.py`) populated exclusively with structured `Issue` records and validated applicant names. No free-form LLM text generation is permitted in emails.
+2. An optional polish layer (Ollama) may only improve grammar; if it hallucinates any dates, names, numbers, or policy codes not present in the draft, it is immediately discarded and falls back to the template.
+3. Outgoing messages enter an SQLite `outbox` table (`app/notify/sender.py`).
+4. Strict safety defaults: `DRY_RUN=true` by default (never hits SMTP network), recipient address allowlisting (blocking non-allowlisted emails even if mock SMTP is configured), and requiring explicit human reviewer approval before any `held` draft can be marked sent.
+
+**Consequences:** Complete immunity to prompt injection via applicant documents. Zero risk of test emails escaping into real applicant mailboxes.
+
+---
+
+## ADR-012: Dual-Mode Streamlit UI with Immutable Audit Trail
+
+**Status:** Accepted
+
+**Context:** Operators need a visual workbench to inspect cases, view original and processed documents, inspect bounding boxes, review discrepancies, and take adjudication actions. The UI must run equally well on developer Windows laptops (no GPU, `INX_MODE=mock`) and production macOS machines (`INX_MODE=real`).
+
+**Decision:**
+1. Streamlit application (`app/ui/streamlit_app.py`) dynamically detects `INX_MODE` and sets mock/real pipeline readers accordingly.
+2. Document visualization renders original PDFs/images alongside processed clean images (`page{N}_clean.png`) with Pillow bounding box overlays drawn from `FieldResult.bbox`.
+3. Reviewer actions (accept value, correct value with mandatory note, approve, reject, request info) write immutable hash-chained audit events. The pipeline extractor/engine never marks a case `APPROVED` or `REJECTED` directly; that privilege is restricted exclusively to human reviewers.
+
+**Consequences:** Complete separation of automated policy assessment from binding legal decisions. Smoke testing runs seamlessly in CI via `streamlit.testing.v1.AppTest`.
+
+

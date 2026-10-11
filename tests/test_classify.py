@@ -11,11 +11,14 @@ Includes:
 
 from __future__ import annotations
 
+import sys
 import unittest.mock as mock
 from pathlib import Path
 
 import numpy as np
 import pytest
+
+is_mac = sys.platform == "darwin"
 
 from app.classify.base import ClassificationResult, Classifier
 from app.classify.classifier import DocumentClassifier, classify_documents
@@ -236,6 +239,7 @@ def test_unload_frees_memory():
 
 
 @pytest.mark.mac
+@pytest.mark.skipif(not is_mac, reason="BGE-M3 and VLM integration requires Apple Silicon / macOS")
 def test_integration_classify_clean_fixtures():
     """Integration test running real DocumentClassifier against synthetic fixtures."""
     clf = DocumentClassifier()
