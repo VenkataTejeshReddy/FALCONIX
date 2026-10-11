@@ -192,4 +192,82 @@ MPS, and reproducible lockfile across environments.
 
 **Consequences:** Complete separation of automated policy assessment from binding legal decisions. Smoke testing runs seamlessly in CI via `streamlit.testing.v1.AppTest`.
 
+---
+
+## ADR-013: Strict Matching on Identifiers and Dates
+
+**Status:** Accepted
+
+**Context:** Relaxed or forgiving matching on dates and personal IDs causes false valids (e.g. accepting tampered Verhoeff numbers or corrupt calendar dates). In legal and enterprise compliance intake, automated systems must never silently coerce or validate altered data.
+
+**Decision:**
+1. Verhoeff checksum algorithm is strictly enforced for 12-digit personal identity numbers. Tampered checksums immediately fail validation.
+2. Date parsing strictly enforces calendar validity (rejecting 30/02/2023, 31/04/2023, 29/02/2023 non-leap, future DOB, and out-of-order date ranges).
+3. Cross-document comparison flags subtle typos, initials (e.g. P. Sharma vs Priya Sharma), and surname inversions as candidate conflicts rather than silently marking them valid.
+4. Validation defects are evaluated against values *as printed*, ensuring defect detection rate is preserved end-to-end.
+
+**Consequences:** Eliminates false-valid leakage. Increases human review volume slightly for genuine edge cases, ensuring compliance safety.
+
+---
+
+## ADR-014: Unified Memory Management via keep_alive and unload() Policy
+
+**Status:** Accepted
+
+**Context:** Modern neural models (BGE-M3, Docling OCR, Qwen3-VL) compete for unified memory and CPU RAM on Apple Silicon. Leaving models permanently resident or leaking PyTorch MPS tensors degrades system performance, causing subsequent test suites or batch jobs to stall or trigger memory pressure.
+
+**Decision:**
+1. All concrete readers and classifiers implementing project protocols expose an explicit `unload()` method.
+2. `DocumentClassifier.unload()` sets model references to `None`, clears cached prototype embeddings, executes `gc.collect()`, and calls `torch.mps.empty_cache()`.
+3. Ollama requests set `keep_alive="3m"`, allowing rapid consecutive queries within an intake batch while guaranteeing automatic process unloading after inactivity.
+
+**Consequences:** Peak memory remains bounded (~1 GB). Prevents MPS memory fragmentation across multi-stage pipeline executions.
+
+---
+
+## ADR-015: Anonymized Classification – Filename Never Used
+
+**Status:** Accepted
+
+**Context:** File names are unauthenticated user-supplied strings and frequent attack vectors. A malicious applicant may name a fake resume `official_marksheet.pdf`, or legitimate scanners may output neutral filenames such as `scan001.pdf` or `IMG_2041.jpg`.
+
+**Decision:**
+1. `DocumentClassifier.classify()` strictly ignores `DocumentRecord.filename`.
+2. All classification logic operates exclusively on parsed document content: OCR text, bounding-box layout hints, dense semantic embeddings, and rendered page imagery.
+3. Test harnesses and benchmarks anonymize filenames (`hidden_input_<sha>.bin`) to enforce protocol independence.
+
+**Consequences:** The classifier cannot be deceived by deceptive filenames, and naturally handles neutral filenames from scanner hardware.
+
+---
+
+## ADR-016: Three-Tier Hierarchical Classification Architecture
+
+**Status:** Accepted
+
+**Context:** Keyword rules are fast and deterministic for clear documents, but fail on degraded scans or unconventional layouts. Calling a heavy VLM for every single document in a batch is slow and computationally prohibitive.
+
+**Decision:**
+1. **Layer 1 (Rules):** Evaluates keyword weights, negative keyword penalties, and structural layout signals. Decisive if and only if $\text{top\_score} \ge 0.60$ and $\text{margin} \ge 0.25$.
+2. **Layer 2 (Embeddings):** Evaluates BGE-M3 dense cosine similarity between document text (first 1,500 chars) and archetype descriptions when Layer 1 is non-decisive.
+3. **Layer 3 (VLM):** Invoked only when Layers 1 and 2 disagree or best confidence is low. Constrained by JSON schema to enum types or `"unknown"`.
+4. **Safety Contract:** Document text is strictly data, never prompt instructions.
+
+**Consequences:** 85%+ of standard documents resolve in milliseconds via Layer 1/2. Layer 3 VLM handles visual ambiguities without being vulnerable to prompt injection.
+
+---
+
+## ADR-017: Held-Out Semantic Generalization vs Fixture Overfitting
+
+**Status:** Accepted
+
+**Context:** Prototype keywords can inadvertently overfit to specific synthetic generator templates (e.g. "Candidate Profile Evaluation"). Evaluating only against familiar fixtures creates a false illusion of robustness.
+
+**Decision:**
+1. Remove all fixture-specific phrases from `config/doc_type_prototypes.yaml` (e.g. "candidate profile evaluation", "central verification bureau", "consolidated dossier").
+2. Retain only generic domain terms across resumes, IDs, marksheets, and letters.
+3. Maintain an isolated held-out test harness with paraphrased descriptions and heading-free documents.
+4. Report fixture accuracy (74.3%) and held-out semantic generalization accuracy (40.0%) as distinct, honest metrics.
+
+**Consequences:** Transparent accounting of model generalization boundaries. Real-world documents with ambiguous or non-standard text route safely to Layer 3 VLM or manual review rather than making confident false assumptions.
+
 
