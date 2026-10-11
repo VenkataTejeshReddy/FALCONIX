@@ -901,12 +901,16 @@ def build_pipeline(
         extractor = MockExtractor()
         cache = None
 
+    from functools import partial
     from app.store.db import save_case
+
+    db_path = _data / "audit.db"
+    store_fn = partial(save_case, db_path=db_path)
 
     return Pipeline(
         classifier=classifier,
         extractor=extractor,
-        store=save_case,
+        store=store_fn,
         scenario_cfg=cfg,
         cache=cache,
     )

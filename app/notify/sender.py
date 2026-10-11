@@ -261,6 +261,25 @@ def dispatch_outbox_item(
     html_body = item.get("body_html")
 
     try:
+        if is_dry_run():
+            logger.info("[DRY_RUN] Dispatched outbox item #%d to %s (simulated)", outbox_id, recipient)
+            now = datetime.now(timezone.utc).isoformat()
+            update_outbox_status(outbox_id, status="dry_run", sent_at=now, db_path=db_path)
+            return True
+
+        allowed = allowed_recipients()
+        if allowed and recipient.strip().lower() not in allowed:
+            err_msg = f"Recipient '{recipient}' is not in ALLOWED_RECIPIENTS"
+            logger.warning("[ALLOWLIST_BLOCKED] Outbox #%d to %s refused: %s", outbox_id, recipient, err_msg)
+            update_outbox_status(
+                outbox_id,
+                status="failed",
+                error=err_msg,
+                increment_retries=True,
+                db_path=db_path,
+            )
+            return False
+
         ok = send_email(recipient, subject, plain_body, html_body)
         if ok:
             now = datetime.now(timezone.utc).isoformat()

@@ -41,7 +41,7 @@ from app.schemas import (
     Route,
     WorkflowStatus,
 )
-from app.store.audit import verify_chain, write_audit
+from app.store.audit import verify_chain, verify_chain_detailed, write_audit
 from app.store.db import (
     get_outbox,
     list_cases,
@@ -176,19 +176,24 @@ def _render_pdf_page(pdf_path: Path, page_idx: int = 0) -> Optional[Image.Image]
 def _draw_bboxes(
     img: Image.Image, case: CaseRecord, doc_type: str, page_idx: int
 ) -> Image.Image:
-    """Draw bounding boxes for extracted fields onto the page image."""
+    """Draw bounding boxes for extracted fields onto the processed clean page image."""
     drawn = img.copy().convert("RGB")
     draw = ImageDraw.Draw(drawn)
 
     for _, fr in case.fields.items():
-        if fr.page == page_idx and fr.bbox:
-            dt_match = fr.doc_type is None or fr.doc_type.value == doc_type
+        if fr.page == page_idx and fr.bbox is not None:
+            dt_match = fr.doc_type is None or (
+                getattr(fr.doc_type, "value", str(fr.doc_type)) == doc_type
+            )
             if dt_match:
                 b = fr.bbox
-                color = "#16A34A" if fr.status == FieldStatus.valid else "#DC2626"
-                draw.rectangle([b.x0, b.y0, b.x1, b.y1], outline=color, width=3)
-                label = f"{fr.field}: {fr.value or ''}"
-                draw.text((b.x0 + 4, max(0, b.y0 - 16)), label, fill=color)
+                try:
+                    color = "#16A34A" if fr.status == FieldStatus.valid else "#DC2626"
+                    draw.rectangle([b.x0, b.y0, b.x1, b.y1], outline=color, width=3)
+                    label = f"{fr.field}: {fr.value or ''}"
+                    draw.text((b.x0 + 4, max(0, b.y0 - 16)), label, fill=color)
+                except Exception as exc:
+                    logger.debug("Failed drawing bbox for field %s: %s", fr.field, exc)
 
     return drawn
 
@@ -388,13 +393,18 @@ def view_batch() -> None:
             st.info(f"Uploaded `{uploaded_file.name}` containing **{count} emails**.")
 
     batch_limit_val = st.number_input(
-        "Limit processing count (0 for all emails)",
+        "Max Emails to Process (0 = All)",
         min_value=0,
         value=int(st.session_state.get("batch_limit_input", 0)),
         step=1,
         key="batch_limit_input",
     )
     batch_limit = int(batch_limit_val) if batch_limit_val > 0 else None
+
+    # Real mode cold start announcement
+    mode = os.getenv("INX_MODE", "mock").lower()
+    if mode == "real":
+        st.info("ℹ️ Real Mode: Using local Qwen3-VL via Ollama & BGE-M3. First call may experience cold-start latency (~5-10s).")
 
     # Run Batch Button
     if source_path is not None and st.button("🚀 Start Batch Processing", key="btn_run_batch", type="primary"):
@@ -406,39 +416,57 @@ def view_batch() -> None:
         results_placeholder = st.empty()
 
         pipeline = build_pipeline(scenario=scenario, data_dir=get_data_dir())
-        events_generator = pipeline.run_batch(source_path, scenario=scenario, limit=batch_limit)
 
         batch_results: list[dict[str, Any]] = []
         skipped_dups: list[str] = []
         start_time = time.time()
 
-        for ev in events_generator:
-            if ev.kind == "batch_started":
-                status_text.text(f"Batch started: {ev.message}")
-            elif ev.kind == "skipped_duplicate":
-                skipped_dups.append(ev.message)
-            elif ev.kind == "case_started":
-                frac = ev.index / max(total_emails, 1)
-                eta_str = ""
-                if ev.index > 1:
-                    elapsed = time.time() - start_time
-                    avg_c = elapsed / (ev.index - 1)
-                    rem = max(0.0, (total_emails - ev.index + 1) * avg_c)
-                    eta_str = f" | Est. remaining: ~{int(rem)}s"
-                progress_bar.progress(frac, text=f"Processing case {ev.index}/{total_emails}: {ev.sender}{eta_str}")
-            elif ev.kind == "stage":
-                status_text.text(f"Case {ev.index}/{total_emails} ({ev.sender}) → Stage: {ev.stage.upper()} ({ev.status})")
-            elif ev.kind == "case_finished":
-                batch_results.append({
-                    "Case ID": ev.case_id,
-                    "Sender": ev.sender,
-                    "Route": ev.status,
-                    "Reason": ev.message,
-                })
-                safe_render_table(batch_results, results_placeholder)
-            elif ev.kind == "batch_finished":
-                progress_bar.progress(1.0, text="Batch execution completed!")
-                status_text.text(f"Finished: {ev.message} in {time.time() - start_time:.1f}s")
+        try:
+            events_generator = pipeline.run_batch(source_path, scenario=scenario, limit=batch_limit)
+            for ev in events_generator:
+                if ev.kind == "batch_started":
+                    status_text.text(f"Batch started: {ev.message}")
+                elif ev.kind == "skipped_duplicate":
+                    skipped_dups.append(ev.message)
+                elif ev.kind == "case_started":
+                    frac = ev.index / max(total_emails, 1)
+                    eta_str = ""
+                    if ev.index > 1:
+                        elapsed = time.time() - start_time
+                        avg_c = elapsed / (ev.index - 1)
+                        rem = max(0.0, (total_emails - ev.index + 1) * avg_c)
+                        eta_str = f" | Est. remaining: ~{int(rem)}s"
+                    progress_bar.progress(frac, text=f"Processing case {ev.index}/{total_emails}: {ev.sender}{eta_str}")
+                elif ev.kind == "stage":
+                    status_text.text(f"Case {ev.index}/{total_emails} ({ev.sender}) → Stage: {ev.stage.upper()} ({ev.status})")
+                elif ev.kind == "case_finished":
+                    batch_results.append({
+                        "Case ID": ev.case_id,
+                        "Sender": ev.sender,
+                        "Route": ev.status,
+                        "Reason": ev.message,
+                    })
+                    safe_render_table(batch_results, results_placeholder)
+                elif ev.kind == "batch_finished":
+                    progress_bar.progress(1.0, text="Batch execution completed!")
+                    status_text.text(f"Finished: {ev.message} in {time.time() - start_time:.1f}s")
+                else:
+                    logger.debug("Received event kind '%s': %s", ev.kind, ev.message)
+        except Exception as exc:
+            logger.exception("Batch execution failed: %s", exc)
+            st.error(f"⚠️ Batch processing interrupted: {exc}")
+        finally:
+            # Memory discipline: release model weights if supported
+            if hasattr(pipeline, "classifier") and hasattr(pipeline.classifier, "unload"):
+                try:
+                    pipeline.classifier.unload()
+                except Exception:
+                    pass
+            if hasattr(pipeline, "extractor") and hasattr(pipeline.extractor, "unload"):
+                try:
+                    pipeline.extractor.unload()
+                except Exception:
+                    pass
 
         st.session_state["batch_results"] = batch_results
 
@@ -544,24 +572,42 @@ def view_quick_check() -> None:
                 target_paths.append(p)
 
     if target_paths and st.button("🔍 Evaluate Document", key="btn_run_quick_check", type="primary"):
-        with st.spinner("Processing document through pipeline..."):
-            pipeline = build_pipeline(scenario=scenario, data_dir=get_data_dir())
-            events = list(pipeline.process_files(target_paths, scenario=scenario, label="Quick Check"))
+        try:
+            with st.spinner("Processing document through pipeline..."):
+                pipeline = build_pipeline(scenario=scenario, data_dir=get_data_dir())
+                events = list(pipeline.process_files(target_paths, scenario=scenario, label="Quick Check"))
 
-        case_finish = next((ev for ev in events if ev.kind == "case_finished"), None)
-        if case_finish:
-            st.success("Evaluation complete!")
-            st.markdown(
-                f"**Case Reference:** `{case_finish.case_id}` &nbsp;&nbsp;|&nbsp;&nbsp; "
-                f"**Route:** {_route_badge_html(case_finish.status)} &nbsp;&nbsp;|&nbsp;&nbsp; "
-                f"**Reasons:** {case_finish.message}",
-                unsafe_allow_html=True,
-            )
-            st.session_state["selected_case_id"] = case_finish.case_id
-            if st.button("Inspect Case Details", key="btn_open_qc_case"):
-                st.session_state["nav_radio"] = "Case Inspector"
-        else:
-            st.error("Document evaluation produced no outcome.")
+            case_finish = next((ev for ev in events if ev.kind == "case_finished"), None)
+            if case_finish:
+                st.success("Evaluation complete!")
+                st.markdown(
+                    f"**Case Reference:** `{case_finish.case_id}` &nbsp;&nbsp;|&nbsp;&nbsp; "
+                    f"**Route:** {_route_badge_html(case_finish.status)} &nbsp;&nbsp;|&nbsp;&nbsp; "
+                    f"**Reasons:** {case_finish.message}",
+                    unsafe_allow_html=True,
+                )
+                c_record = load_case(case_finish.case_id, db_path=get_db_path())
+                if c_record and c_record.fields:
+                    st.markdown("##### Extracted Fields:")
+                    field_summary = [
+                        {
+                            "Field": fr.field,
+                            "Value": fr.value or "(empty)",
+                            "Status": fr.status.value,
+                            "Confidence": f"{fr.confidence:.2f}",
+                        }
+                        for fr in c_record.fields.values()
+                    ]
+                    safe_render_table(field_summary)
+
+                st.session_state["selected_case_id"] = case_finish.case_id
+                if st.button("Inspect Case Details", key="btn_open_qc_case"):
+                    st.session_state["nav_radio"] = "Case Inspector"
+            else:
+                st.error("Document evaluation produced no outcome.")
+        except Exception as exc:
+            logger.exception("Quick check evaluation failed: %s", exc)
+            st.error(f"⚠️ Quick check failed: {exc}")
 
 
 # ---------------------------------------------------------------------------
@@ -625,20 +671,30 @@ def view_case_inspector() -> None:
             )
             doc = case.documents[doc_idx]
 
+            if doc.pages > 1:
+                selected_page = st.selectbox(
+                    f"Select Page (1 to {doc.pages})",
+                    range(doc.pages),
+                    format_func=lambda p: f"Page {p + 1} of {doc.pages}",
+                    key=f"page_sel_{doc.doc_id}",
+                )
+            else:
+                selected_page = 0
+
             storage_p = Path(doc.storage_path) if doc.storage_path else None
             show_bbox = st.toggle("Show Processed Page with Bounding Boxes", value=False, key="toggle_bbox")
 
             rendered_img: Optional[Image.Image] = None
 
-            if show_bbox and doc.page_images:
-                # Load processed page image
-                page_img_path = Path(doc.page_images[0])
+            if show_bbox and doc.page_images and selected_page < len(doc.page_images):
+                # Load processed page image (page{N}_clean.png)
+                page_img_path = Path(doc.page_images[selected_page])
                 if page_img_path.exists():
                     clean_img = Image.open(page_img_path)
-                    rendered_img = _draw_bboxes(clean_img, case, doc.doc_type.value, page_idx=0)
+                    rendered_img = _draw_bboxes(clean_img, case, doc.doc_type.value, page_idx=selected_page)
             elif storage_p and storage_p.exists():
                 if storage_p.suffix.lower() == ".pdf":
-                    rendered_img = _render_pdf_page(storage_p, page_idx=0)
+                    rendered_img = _render_pdf_page(storage_p, page_idx=selected_page)
                 else:
                     try:
                         rendered_img = Image.open(storage_p)
@@ -646,7 +702,7 @@ def view_case_inspector() -> None:
                         rendered_img = None
 
             if rendered_img:
-                st.image(rendered_img, caption=f"{doc.filename} (Page 1)", width="stretch")
+                st.image(rendered_img, caption=f"{doc.filename} (Page {selected_page + 1})", width="stretch")
             else:
                 st.warning("Preview image unavailable for this file.")
 
@@ -659,6 +715,18 @@ def view_case_inspector() -> None:
                     mime="application/octet-stream",
                     key="btn_download_original",
                 )
+
+            if case.skipped_files:
+                st.divider()
+                st.warning(f"⚠️ **Skipped / Rejected Attachments ({len(case.skipped_files)}):**")
+                safe_render_table([
+                    {
+                        "Filename": sf.get("filename", "unknown"),
+                        "Status": sf.get("status", "rejected"),
+                        "Reason": sf.get("reason", ""),
+                    }
+                    for sf in case.skipped_files
+                ])
 
     with col_fields:
         st.markdown("#### 📑 Extracted Fields & Provenance")
@@ -754,8 +822,8 @@ def view_case_inspector() -> None:
         if case.fields:
             field_to_edit = st.selectbox("Select Field", list(case.fields.keys()), key="rev_field_select")
             curr_val = case.fields[field_to_edit].value or ""
-            new_val = st.text_input("Corrected Value", value=curr_val, key="rev_new_val")
-            rev_note = st.text_input("Mandatory Reviewer Note", key="rev_correction_note")
+            new_val = st.text_input("Proposed Correction", value=curr_val, key="rev_new_val")
+            rev_note = st.text_input("Reviewer Justification Note (Required)", key="rev_correction_note")
 
             b_c1, b_c2 = st.columns(2)
             with b_c1:
@@ -784,9 +852,9 @@ def view_case_inspector() -> None:
                         st.error("A mandatory reviewer note is required.")
                     else:
                         case.intake_notes.append(
-                            f"[{rev_name}]: Corrected '{field_to_edit}' from '{curr_val}' to '{new_val}'. Note: {rev_note}"
+                            f"[{rev_name}]: Correction noted for '{field_to_edit}': proposed '{new_val}' (original extraction '{curr_val}' preserved). Note: {rev_note}"
                         )
-                        case.fields[field_to_edit].value = new_val
+                        # Rule 2b invariant: never overwrite original extraction on case.fields
                         save_case(case, db_path=get_db_path())
                         write_audit(
                             case,
@@ -943,11 +1011,11 @@ def view_audit() -> None:
         st.markdown("#### Cryptographic Hash-Chain Verification")
         if st.button("🔐 Verify Hash-Chain Integrity", key="btn_verify_chain", type="primary"):
             audit_p = get_audit_path()
-            intact = verify_chain(audit_p)
+            intact, broken_line = verify_chain_detailed(audit_p)
             if intact:
                 st.success("✅ Chain intact: Tamper-evident SHA-256 cryptographic chain fully verified.")
             else:
-                st.error("❌ Chain broken! Audit log integrity check failed.")
+                st.error(f"❌ Chain broken at line {broken_line}! Tampering detected.")
 
         st.divider()
 

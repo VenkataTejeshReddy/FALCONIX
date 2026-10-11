@@ -110,23 +110,38 @@ def write_audit(
         f.write(line + "\n")
 
 
-def verify_chain(audit_path: Optional[Path] = None) -> bool:
-    """Verify the hash-chain integrity of the audit log."""
+def verify_chain_detailed(audit_path: Optional[Path] = None) -> tuple[bool, Optional[int]]:
+    """Verify the hash-chain integrity of the audit log.
+
+    Returns:
+        (True, None) if the cryptographic chain is fully intact.
+        (False, line_number) if tampering or hash discontinuity is detected at line_number (1-indexed).
+    """
     path = audit_path or _DEFAULT_AUDIT_PATH
     if not path.exists():
-        return True
+        return True, None
 
     prev_hash = "GENESIS"
     with path.open("r", encoding="utf-8") as f:
-        for line in f:
+        for line_idx, line in enumerate(f, start=1):
             line_str = line.strip()
             if not line_str:
                 continue
 
-            entry = json.loads(line_str)
+            try:
+                entry = json.loads(line_str)
+            except Exception:
+                return False, line_idx
+
             if entry.get("prev_hash") != prev_hash:
-                return False
+                return False, line_idx
 
             prev_hash = _hash_line(line_str)
 
-    return True
+    return True, None
+
+
+def verify_chain(audit_path: Optional[Path] = None) -> bool:
+    """Verify the hash-chain integrity of the audit log."""
+    intact, _ = verify_chain_detailed(audit_path)
+    return intact

@@ -127,7 +127,7 @@ INX supports dual execution modes controlled by the `INX_MODE` environment varia
 | Mode | Environment | Description |
 |---|---|---|
 | `INX_MODE=mock` | Laptop B (Windows), CI, Unit Tests | Zero GPU/model dependencies. Uses `MockReader` looking up synthetic JSON fixtures in `fixtures/synthetic_docs/`. Instantaneous processing for rapid verification. |
-| `INX_MODE=real` | Laptop A (macOS Apple Silicon) | Full vision/AI stack: Apple Vision OCR / RapidOCR, Docling layout/tables, Qwen3-VL via Ollama, and BGE-M3 embeddings. |
+| `INX_MODE=real` | Laptop A (macOS Apple Silicon) | Full vision/AI stack: Apple Vision OCR / RapidOCR, Docling layout/tables, Qwen3-VL via Ollama, and BGE-M3 embeddings. Real-mode throughput, memory residency, and live accuracy to be confirmed in the Mac integration run. |
 
 ---
 

@@ -252,7 +252,7 @@ MPS, and reproducible lockfile across environments.
 3. **Layer 3 (VLM):** Invoked only when Layers 1 and 2 disagree or best confidence is low. Constrained by JSON schema to enum types or `"unknown"`.
 4. **Safety Contract:** Document text is strictly data, never prompt instructions.
 
-**Consequences:** 85%+ of standard documents resolve in milliseconds via Layer 1/2. Layer 3 VLM handles visual ambiguities without being vulnerable to prompt injection.
+**Consequences:** High proportion of standard documents resolve rapidly via Layer 1/2 without invoking VLM (exact throughput and latency distribution to be confirmed in the Mac integration run). Layer 3 VLM handles visual ambiguities without being vulnerable to prompt injection.
 
 ---
 
@@ -266,7 +266,7 @@ MPS, and reproducible lockfile across environments.
 1. Remove all fixture-specific phrases from `config/doc_type_prototypes.yaml` (e.g. "candidate profile evaluation", "central verification bureau", "consolidated dossier").
 2. Retain only generic domain terms across resumes, IDs, marksheets, and letters.
 3. Maintain an isolated held-out test harness with paraphrased descriptions and heading-free documents.
-4. Report fixture accuracy (74.3%) and held-out semantic generalization accuracy (40.0%) as distinct, honest metrics.
+4. Report fixture accuracy and held-out semantic generalization accuracy as distinct, honest metrics (baseline fixture metrics measured on Mac: 74.3% fixture accuracy, 40.0% zero-shot held-out; final full integration figures to be confirmed in the Mac integration run).
 
 **Consequences:** Transparent accounting of model generalization boundaries. Real-world documents with ambiguous or non-standard text route safely to Layer 3 VLM or manual review rather than making confident false assumptions.
 
