@@ -188,6 +188,12 @@ class Pipeline:
         work_dir = Path(tempfile.gettempdir()) / "falconix_pipeline" / run_id
         work_dir.mkdir(parents=True, exist_ok=True)
 
+        from app.notify import send_notifications
+        from app.report import ExcelReport
+
+        batch_start_time = time.time()
+        report = ExcelReport(run_id=run_id, data_dir=self._data_root)
+
         for msg in iter_messages(source):
             email_idx += 1
 
@@ -296,9 +302,31 @@ class Pipeline:
             )
 
             # Run all pipeline stages with exception isolation
+            case_start_t = time.time()
             yield from self._run_case_stages(
                 case, run_id=run_id, index=processed, total=total, raw_bytes=raw_bytes
             )
+            case_elapsed_s = time.time() - case_start_t
+
+            # Send notification draft/dispatch
+            email_status = "none"
+            try:
+                email_status = send_notifications(
+                    case, db_path=self._data_root / "audit.db"
+                )
+            except Exception as exc:
+                logger.warning("Notification dispatch failed for case %s: %s", case.case_id, exc)
+                email_status = "failed"
+
+            # Record in Excel report atomically
+            try:
+                report.append_case(
+                    case,
+                    email_status=email_status,
+                    elapsed_s=case_elapsed_s,
+                )
+            except Exception as exc:
+                logger.warning("Appending case to Excel report failed: %s", exc)
 
             yield ProgressEvent(
                 kind="case_finished",
@@ -310,6 +338,15 @@ class Pipeline:
                 message="; ".join(case.reasons[:2]),
                 message_id=case.message_id,
             )
+
+        # Finalise Excel report
+        try:
+            report.finalise(
+                elapsed_s=time.time() - batch_start_time,
+                skipped_dups=len(skipped_dups),
+            )
+        except Exception as exc:
+            logger.warning("Finalising Excel report failed: %s", exc)
 
         yield ProgressEvent(
             kind="batch_finished",

@@ -87,6 +87,22 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
                 actor       TEXT,
                 payload     TEXT
             );
+
+            CREATE TABLE IF NOT EXISTS outbox (
+                outbox_id   INTEGER PRIMARY KEY AUTOINCREMENT,
+                case_id     TEXT NOT NULL,
+                kind        TEXT NOT NULL,
+                recipient   TEXT NOT NULL,
+                subject     TEXT NOT NULL,
+                body_text   TEXT NOT NULL,
+                body_html   TEXT,
+                status      TEXT NOT NULL DEFAULT 'draft',
+                created_at  TEXT NOT NULL,
+                approved_by TEXT,
+                sent_at     TEXT,
+                error       TEXT,
+                retries     INTEGER NOT NULL DEFAULT 0
+            );
             """
         )
 
@@ -301,3 +317,206 @@ def list_events(
             }
         )
     return results
+
+
+# ---------------------------------------------------------------------------
+# Outbox API
+# ---------------------------------------------------------------------------
+
+
+def record_outbox(
+    case_id: str,
+    kind: str,
+    recipient: str,
+    subject: str,
+    body_text: str,
+    body_html: Optional[str] = None,
+    status: str = "draft",
+    approved_by: Optional[str] = None,
+    db_path: Optional[Path] = None,
+) -> int:
+    """Record an email draft or dispatch in the outbox table.
+
+    Appends an audit event recording the outbox creation.
+
+    Returns:
+        The auto-generated outbox_id.
+    """
+    path = db_path or _DEFAULT_DB_PATH
+    conn = _get_connection(path)
+    now = datetime.now(timezone.utc).isoformat()
+
+    with conn:
+        cur = conn.execute(
+            """
+            INSERT INTO outbox (
+                case_id, kind, recipient, subject, body_text, body_html, status,
+                created_at, approved_by, retries
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0);
+            """,
+            (
+                case_id,
+                kind,
+                recipient,
+                subject,
+                body_text,
+                body_html,
+                status,
+                now,
+                approved_by,
+            ),
+        )
+        outbox_id = cur.lastrowid
+    conn.close()
+
+    append_event(
+        case_id=case_id,
+        stage="outbox_recorded",
+        actor="notify",
+        payload={
+            "outbox_id": outbox_id,
+            "kind": kind,
+            "recipient": recipient,
+            "subject": subject,
+            "status": status,
+        },
+        db_path=db_path,
+    )
+    return outbox_id
+
+
+def update_outbox_status(
+    outbox_id: int,
+    status: str,
+    approved_by: Optional[str] = None,
+    sent_at: Optional[str] = None,
+    error: Optional[str] = None,
+    increment_retries: bool = False,
+    db_path: Optional[Path] = None,
+) -> None:
+    """Update status, error, and timestamps of an outbox message.
+
+    Appends an audit event for each state change.
+    """
+    path = db_path or _DEFAULT_DB_PATH
+    conn = _get_connection(path)
+
+    # Fetch case_id for audit event
+    cur = conn.execute("SELECT case_id, status FROM outbox WHERE outbox_id = ?", (outbox_id,))
+    row = cur.fetchone()
+    if not row:
+        conn.close()
+        return
+
+    case_id = row["case_id"]
+    prev_status = row["status"]
+
+    with conn:
+        if increment_retries:
+            conn.execute(
+                """
+                UPDATE outbox
+                SET status = ?, approved_by = COALESCE(?, approved_by),
+                    sent_at = COALESCE(?, sent_at), error = ?,
+                    retries = retries + 1
+                WHERE outbox_id = ?;
+                """,
+                (status, approved_by, sent_at, error, outbox_id),
+            )
+        else:
+            conn.execute(
+                """
+                UPDATE outbox
+                SET status = ?, approved_by = COALESCE(?, approved_by),
+                    sent_at = COALESCE(?, sent_at), error = ?
+                WHERE outbox_id = ?;
+                """,
+                (status, approved_by, sent_at, error, outbox_id),
+            )
+    conn.close()
+
+    append_event(
+        case_id=case_id,
+        stage="outbox_status_changed",
+        actor="notify",
+        payload={
+            "outbox_id": outbox_id,
+            "previous_status": prev_status,
+            "new_status": status,
+            "approved_by": approved_by,
+            "sent_at": sent_at,
+            "error": error,
+        },
+        db_path=db_path,
+    )
+
+
+def release_held(
+    outbox_id: int,
+    approved_by: str = "reviewer",
+    db_path: Optional[Path] = None,
+) -> None:
+    """Approve a held draft so it can be dispatched.
+
+    Updates status from 'held' to 'draft' and records the approver.
+    """
+    update_outbox_status(
+        outbox_id=outbox_id,
+        status="draft",
+        approved_by=approved_by,
+        db_path=db_path,
+    )
+
+
+def list_outbox(
+    case_id: Optional[str] = None,
+    status: Optional[str] = None,
+    kind: Optional[str] = None,
+    limit: int = 100,
+    db_path: Optional[Path] = None,
+) -> list[dict[str, Any]]:
+    """Query outbox messages with optional filters."""
+    path = db_path or _DEFAULT_DB_PATH
+    if not path.exists():
+        return []
+
+    conn = _get_connection(path)
+    query = "SELECT * FROM outbox WHERE 1=1"
+    params: list[Any] = []
+
+    if case_id:
+        query += " AND case_id = ?"
+        params.append(case_id)
+    if status:
+        query += " AND status = ?"
+        params.append(status)
+    if kind:
+        query += " AND kind = ?"
+        params.append(kind)
+
+    query += " ORDER BY outbox_id DESC LIMIT ?"
+    params.append(limit)
+
+    cur = conn.execute(query, params)
+    rows = cur.fetchall()
+    conn.close()
+
+    return [dict(r) for r in rows]
+
+
+def get_outbox(
+    outbox_id: int,
+    db_path: Optional[Path] = None,
+) -> Optional[dict[str, Any]]:
+    """Fetch a single outbox record by outbox_id."""
+    path = db_path or _DEFAULT_DB_PATH
+    if not path.exists():
+        return None
+
+    conn = _get_connection(path)
+    cur = conn.execute("SELECT * FROM outbox WHERE outbox_id = ?", (outbox_id,))
+    row = cur.fetchone()
+    conn.close()
+
+    return dict(row) if row else None
+

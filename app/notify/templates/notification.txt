@@ -1,0 +1,30 @@
+Dear {{ recipient_name }},
+
+{% if route == "PROCESS" %}
+Your submission ({{ scenario }}) has been received and successfully verified.
+It has been forwarded for processing.
+
+{% elif route == "REQUEST_INFO" %}
+We have reviewed your submission and found that one or more required pieces
+of information are missing or could not be verified.
+
+{% elif route == "MANUAL_VERIFICATION" %}
+Your submission has been received. Some aspects of your documents require
+additional verification by our team. We will contact you if further
+information is needed.
+
+{% else %}
+Your submission has been received and is being reviewed by our team.
+
+{% endif %}
+{% if issue_lines %}
+Details:
+{% for line in issue_lines %}
+  • {{ line }}
+{% endfor %}
+{% endif %}
+
+Reference: {{ case_id }}
+
+Regards,
+INX Processing Team

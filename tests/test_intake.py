@@ -49,6 +49,12 @@ def col_mbox() -> Path:
     return _COL_MBOX
 
 
+@pytest.fixture(scope="module")
+def job_cases(job_mbox: Path, tmp_path_factory) -> list[CaseRecord]:
+    data_dir = tmp_path_factory.mktemp("intake_job_data")
+    return build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
+
+
 def test_upfront_count_reporting(job_mbox: Path, tmp_path: Path):
     """Verify count_emails and count_cases report total emails up front."""
     total = count_emails(job_mbox)
@@ -95,13 +101,10 @@ def test_deduplication_by_message_id(job_mbox: Path):
     assert msg_ids.count(shared_id) == 1
 
 
-def test_complete_bundle_is_processed(job_mbox: Path, tmp_path: Path):
+def test_complete_bundle_is_processed(job_cases: list[CaseRecord]):
     """Edge Case 1: Complete bundle (resume + id) produces ingested documents."""
-    data_dir = tmp_path / "data"
-    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
-
     # Case 01 is the complete bundle from Rohan Verma
-    case = cases[0]
+    case = job_cases[0]
     assert case.sender_name == "Rohan Verma"
     assert case.sender_email == "rohan.verma@example.com"
     assert case.subject == "Job Application – Senior Engineer"
@@ -113,13 +116,10 @@ def test_complete_bundle_is_processed(job_mbox: Path, tmp_path: Path):
     assert "id_card.jpg" in filenames
 
 
-def test_email_with_zip_attachment(job_mbox: Path, tmp_path: Path):
+def test_email_with_zip_attachment(job_cases: list[CaseRecord]):
     """Edge Case 11: ZIP attachment is transparently expanded and ingested."""
-    data_dir = tmp_path / "data"
-    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
-
     # Case 11 (index 10) is the ZIP email from Pooja Hegde
-    case = cases[10]
+    case = job_cases[10]
     assert case.sender_name == "Pooja Hegde"
     assert len(case.documents) == 2
     filenames = {d.filename for d in case.documents}
@@ -127,26 +127,20 @@ def test_email_with_zip_attachment(job_mbox: Path, tmp_path: Path):
     assert "id.jpg" in filenames
 
 
-def test_email_with_no_attachments(job_mbox: Path, tmp_path: Path):
+def test_email_with_no_attachments(job_cases: list[CaseRecord]):
     """Edge Case 12: Email with no attachments does not crash, records a note."""
-    data_dir = tmp_path / "data"
-    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
-
     # Case 12 (index 11) is the no-attachment email from Alok Kumar
-    case = cases[11]
+    case = job_cases[11]
     assert case.sender_name == "Alok Kumar"
     assert len(case.documents) == 0
     assert any("no attachments" in note.lower() or "no documents" in note.lower()
                for note in case.intake_notes)
 
 
-def test_email_with_unsupported_attachment(job_mbox: Path, tmp_path: Path):
+def test_email_with_unsupported_attachment(job_cases: list[CaseRecord]):
     """Edge Case 13: .exe attachment is rejected and recorded in skipped_files."""
-    data_dir = tmp_path / "data"
-    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
-
     # Case 13 (index 12) is the .exe-only email
-    case = cases[12]
+    case = job_cases[12]
     assert len(case.documents) == 0
     assert len(case.skipped_files) >= 1
     skipped_fnames = [sf["filename"] for sf in case.skipped_files]
@@ -190,51 +184,39 @@ def test_lazy_streaming(job_mbox: Path, tmp_path: Path):
     assert first_case.sender_email == "rohan.verma@example.com"
 
 
-def test_same_documents_from_two_senders(job_mbox: Path, tmp_path: Path):
+def test_same_documents_from_two_senders(job_cases: list[CaseRecord]):
     """Cases 16 & 17: same files from different senders — 17 should flag duplicate_file."""
-    data_dir = tmp_path / "data"
-    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
-
     # Case 16 (Candidate Alpha) — original, 2 docs
-    case_alpha = cases[14]   # after dedup: 14 unique cases before case 16
+    case_alpha = job_cases[14]   # after dedup: 14 unique cases before case 16
     assert case_alpha.sender_name == "Candidate Alpha"
     assert len(case_alpha.documents) == 2
 
     # Case 17 (Candidate Beta) — same files, should have is_duplicate=True docs
-    case_beta = cases[15]
+    case_beta = job_cases[15]
     assert case_beta.sender_name == "Candidate Beta"
     assert any(d.is_duplicate for d in case_beta.documents)
 
 
-def test_mislabeled_attachment(job_mbox: Path, tmp_path: Path):
+def test_mislabeled_attachment(job_cases: list[CaseRecord]):
     """Case 18: file named marksheet.pdf that is really an ID card — documents ingested."""
-    data_dir = tmp_path / "data"
-    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
-
-    case = cases[16]
+    case = job_cases[16]
     assert case.sender_name == "Manish Malhotra"
     filenames = {d.filename for d in case.documents}
     assert "marksheet.pdf" in filenames  # accepted but mislabeled
 
 
-def test_neutral_attachment_names(job_mbox: Path, tmp_path: Path):
+def test_neutral_attachment_names(job_cases: list[CaseRecord]):
     """Case 19: neutral names (scan001.pdf, IMG_2041.jpg) are ingested without errors."""
-    data_dir = tmp_path / "data"
-    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
-
-    case = cases[17]
+    case = job_cases[17]
     assert case.sender_name == "Aditi Sharma"
     filenames = {d.filename for d in case.documents}
     assert "scan001.pdf" in filenames
     assert "IMG_2041.jpg" in filenames
 
 
-def test_hard_variants_in_mailbox(job_mbox: Path, tmp_path: Path):
+def test_hard_variants_in_mailbox(job_cases: list[CaseRecord]):
     """Case 21: 3 hard augmented variants are ingested from mailbox."""
-    data_dir = tmp_path / "data"
-    cases = build_cases_from_source(job_mbox, scenario="job_application", data_dir=data_dir)
-
-    case = cases[19]
+    case = job_cases[19]
     assert case.sender_name == "Harish Patel"
     assert len(case.documents) == 3
     filenames = {d.filename for d in case.documents}
