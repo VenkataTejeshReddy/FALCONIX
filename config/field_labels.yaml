@@ -1,0 +1,135 @@
+# INX – Field Labels Configuration
+# Synonyms, regex patterns, and data types for OCR locator and extraction.
+
+fields:
+  applicant_name:
+    type: name
+    synonyms:
+      - "Applicant Name"
+      - "Name"
+      - "Candidate Name"
+      - "Candidate"
+      - "Student Name"
+      - "Full Name"
+    regex: '(?i)(?:applicant\s+name|candidate\s+name|candidate|name|student\s+name)\s*[:\-]?\s*([A-Za-z\s\.\,\-]+)'
+
+  email:
+    type: email
+    synonyms:
+      - "Email"
+      - "Email Address"
+      - "E-mail"
+      - "Mail"
+    regex: '[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}'
+
+  phone:
+    type: phone
+    synonyms:
+      - "Phone"
+      - "Phone Number"
+      - "Contact Number"
+      - "Mobile"
+      - "Tel"
+    regex: '(?:\+?\d{1,3}[\s-]?)?\(?\d{2,5}\)?[\s-]?\d{3,5}[\s-]?\d{3,5}'
+
+  highest_qualification:
+    type: text
+    synonyms:
+      - "Highest Qualification"
+      - "Qualification"
+      - "Degree"
+      - "Education"
+    regex: '(?i)(?:highest\s+qualification|qualification|degree|education)\s*[:\-]?\s*([^\n\r]+)'
+
+  institution:
+    type: text
+    synonyms:
+      - "Institution"
+      - "Issuing Authority"
+      - "College"
+      - "University"
+      - "Institute"
+      - "School"
+    regex: '(?i)(?:institution|issuing\s+authority|university|college|institute)\s*[:\-]?\s*([^\n\r]+)'
+
+  years_experience:
+    type: number
+    synonyms:
+      - "Years of Experience"
+      - "Experience"
+      - "Years Experience"
+      - "Total Experience"
+    regex: '(?i)(?:years\s+of\s+experience|years\s+experience|experience)\s*[:\-]?\s*(\d+(?:\.\d+)?(?:\+?\s*(?:years?|yrs?))?)'
+
+  id_number:
+    type: id
+    synonyms:
+      - "Identification Number"
+      - "ID Number"
+      - "Aadhaar Number"
+      - "Aadhaar"
+      - "Govt ID"
+      - "ID No"
+      - "National ID"
+    regex: '\b\d{4}\s*\d{4}\s*\d{4}\b|\b[A-Z0-9]{8,16}\b'
+
+  document_date:
+    type: date
+    synonyms:
+      - "Date of Issue"
+      - "Issue Date"
+      - "Document Date"
+      - "Date"
+      - "Expiry Date"
+    regex: '\b\d{4}[-/.]\d{1,2}[-/.]\d{1,2}\b|\b\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}\b|\b\d{1,2}\s+[A-Za-z]+\s+\d{4}\b|\b[A-Za-z]+\s+\d{1,2},?\s+\d{4}\b'
+
+  date_of_birth:
+    type: date
+    synonyms:
+      - "Date of Birth"
+      - "DOB"
+      - "Birth Date"
+      - "Born"
+    regex: '(?i)(?:date\s+of\s+birth|dob|birth\s+date)\s*[:\-]?\s*(\d{4}[-/.]\d{1,2}[-/.]\d{1,2}|\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}|\d{1,2}\s+[A-Za-z]+\s+\d{4}|[A-Za-z]+\s+\d{1,2},?\s+\d{4})'
+
+  marks_or_grade:
+    type: text
+    synonyms:
+      - "Marks / Grade"
+      - "Marks"
+      - "Grade"
+      - "CGPA"
+      - "Score"
+      - "Percentage"
+    regex: '(?i)(?:marks\s*/\s*grade|marks|grade|cgpa|score|percentage)\s*[:\-]?\s*([0-9]+(?:\.[0-9]+)?(?:\s*(?:cgpa|%|marks))?|[A-F][+-]?)'
+
+  course:
+    type: text
+    synonyms:
+      - "Course / Position"
+      - "Course"
+      - "Programme"
+      - "Position"
+      - "Branch"
+      - "Discipline"
+    regex: '(?i)(?:course\s*/\s*position|course|programme|position|branch)\s*[:\-]?\s*([^\n\r]+)'
+
+  issue_date:
+    type: date
+    synonyms:
+      - "Issue Date"
+      - "Date of Issue"
+      - "Date"
+      - "Issued On"
+    regex: '\b\d{4}[-/.]\d{1,2}[-/.]\d{1,2}\b|\b\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}\b|\b\d{1,2}\s+[A-Za-z]+\s+\d{4}\b|\b[A-Za-z]+\s+\d{1,2},?\s+\d{4}\b'
+
+  registration_number:
+    type: id
+    synonyms:
+      - "Registration Number"
+      - "Reg No"
+      - "Roll Number"
+      - "Roll No"
+      - "Registration No"
+      - "Student ID"
+    regex: '\b[A-Z0-9-]{6,20}\b'
