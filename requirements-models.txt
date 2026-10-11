@@ -1,11 +1,13 @@
-# INX ??? Model requirements (Laptop A only)
-# Install with: pip install -r requirements-models.txt
-# Requires: requirements-core.txt already installed
+# INX – Model requirements (Laptop A)
+# Everything check_env.py and the parse layer import:
 
+pymupdf>=1.24
+opencv-python-headless>=4.9
+ocrmac>=0.3          # Apple Vision OCR – macOS only
 docling>=2.0
-ocrmac>=0.3          # Apple Vision OCR ??? macOS only
 rapidocr-onnxruntime>=1.3
-sentence-transformers>=3.0
-qdrant-client>=1.9
 ollama>=0.2          # Ollama Python client for Qwen3-VL
+sentence-transformers>=3.0
 rank-bm25
+qdrant-client>=1.9
+psutil>=5.9

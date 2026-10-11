@@ -33,22 +33,38 @@ def get_docling_converter(device: str = "mps") -> Any:
     if _CONVERTER_INSTANCE is not None:
         return _CONVERTER_INSTANCE
 
+    import sys
     from docling.datamodel.pipeline_options import PdfPipelineOptions
     from docling.document_converter import DocumentConverter, ImageFormatOption, PdfFormatOption
 
-    pipeline_options = PdfPipelineOptions()
-    pipeline_options.do_ocr = False
-    pipeline_options.do_table_structure = True
+    pdf_options = PdfPipelineOptions()
+    pdf_options.do_ocr = False
+    pdf_options.do_table_structure = True
 
     # Offline cache path check
     artifacts_path = Path.home() / ".cache" / "docling" / "models"
     if artifacts_path.exists():
-        pipeline_options.artifacts_path = artifacts_path
+        pdf_options.artifacts_path = artifacts_path
+
+    img_options = PdfPipelineOptions()
+    img_options.do_table_structure = True
+    if artifacts_path.exists():
+        img_options.artifacts_path = artifacts_path
+
+    if sys.platform == "darwin":
+        try:
+            from docling.datamodel.pipeline_options import OcrMacOptions
+            img_options.do_ocr = True
+            img_options.ocr_options = OcrMacOptions()
+        except Exception:
+            img_options.do_ocr = False
+    else:
+        img_options.do_ocr = False
 
     _CONVERTER_INSTANCE = DocumentConverter(
         format_options={
-            "pdf": PdfFormatOption(pipeline_options=pipeline_options),
-            "image": ImageFormatOption(pipeline_options=pipeline_options),
+            "pdf": PdfFormatOption(pipeline_options=pdf_options),
+            "image": ImageFormatOption(pipeline_options=img_options),
         }
     )
     return _CONVERTER_INSTANCE
